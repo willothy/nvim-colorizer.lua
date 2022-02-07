@@ -52,7 +52,7 @@ library to do custom highlighting themselves.
   DEFAULT_OPTIONS = {
 	RGB      = true;         -- #RGB hex codes
 	RRGGBB   = true;         -- #RRGGBB hex codes
-	names    = true;         -- "Name" codes like Blue
+	names    = true;         -- "Name" codes like Blue oe blue
 	RRGGBBAA = false;        -- #RRGGBBAA hex codes
 	rgb_fn   = false;        -- CSS rgb() and rgba() functions
 	hsl_fn   = false;        -- CSS hsl() and hsla() functions
