@@ -462,6 +462,7 @@ local HIGHLIGHT_NAME_PREFIX = "colorizer"
 local HIGHLIGHT_MODE_NAMES = {
 	background = "mb",
 	foreground = "mf",
+	virtualtext = "mv",
 }
 local HIGHLIGHT_CACHE = {}
 
