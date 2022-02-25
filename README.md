@@ -41,7 +41,7 @@ written with performance in mind and leveraging the excellent LuaJIT and a
 handwritten parser, updates can be done in real time. There are plugins such as
 [hexokinase](https://github.com/RRethy/vim-hexokinase) which have good
 performance, but it has some difficulty with becoming out of sync. The downside
-is that *this only works for Neovim*, and that will never change.
+is that _this only works for Neovim_, and that will never change.
 
 Additionally, having a Lua API that's available means users can use this as a
 library to do custom highlighting themselves.
@@ -64,8 +64,10 @@ library to do custom highlighting themselves.
 ```
 
 MODES:
+
 - `foreground`: sets the foreground text color.
 - `background`: sets the background text color.
+- `virtualtext`: indicate the color behind the virtualtext.
 
 For basic setup, you can use a command like the following.
 
@@ -109,7 +111,6 @@ require 'colorizer'.setup {
 }
 ```
 
-
 For lower level interface, see the [LuaDocs for API details](https://norcalli.github.io/luadoc/nvim-colorizer.lua/modules/colorizer.html) or use `:h colorizer.lua` once installed.
 
 ## Commands
@@ -138,7 +139,6 @@ buffer.
 
 Toggle highlighting of the current buffer.
 ```
-
 
 ## Caveats
 
