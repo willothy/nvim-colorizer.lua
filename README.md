@@ -14,10 +14,10 @@ Requires Neovim >= 0.4.0 and `set termguicolors` (I'm looking into relaxing
 these constraints). If you don't have true color for your terminal or are
 unsure, [read this excellent guide](https://github.com/termstandard/colors).
 
-Use your plugin manager or clone directly into your `runtimepath`.
+Use your plugin manager or clone directly into your package.
 
-```vim
-Plug 'norcalli/nvim-colorizer.lua'
+```lua
+use 'NvChad/nvim-colorizer.lua'
 ```
 
 As long as you have `malloc()` and `free()` on your system, this will work.
@@ -27,8 +27,8 @@ One line setup. This will create an `autocmd` for `FileType *` to highlight
 every filetype.
 **NOTE**: You should add this line after/below where your plugins are setup.
 
-```vim
-lua require'colorizer'.setup()
+```lua
+require'colorizer'.setup()
 ```
 
 ### Why another highlighter?
