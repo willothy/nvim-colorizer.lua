@@ -305,7 +305,10 @@ do
     end
     local r, g, b, match_end = line:sub(i):match "^rgb%(%s*(%d+%%?)%s*,%s*(%d+%%?)%s*,%s*(%d+%%?)%s*%)()"
     if not match_end then
-      return
+      r, g, b, match_end = line:sub(i):match "^rgb%(%s*(%d+%%?)%s+(%d+%%?)%s+(%d+%%?)%s*%)()"
+      if not match_end then
+        return
+      end
     end
     r = percent_or_hex(r)
     if not r then
@@ -322,13 +325,17 @@ do
     local rgb_hex = tohex(bor(lshift(r, 16), lshift(g, 8), b), 6)
     return match_end - 1, rgb_hex
   end
+
   function css_fn.hsl(line, i)
     if #line < i + CSS_HSL_FN_MINIMUM_LENGTH then
       return
     end
     local h, s, l, match_end = line:sub(i):match "^hsl%(%s*(%d+)%s*,%s*(%d+)%%%s*,%s*(%d+)%%%s*%)()"
     if not match_end then
-      return
+      local h, s, l, match_end = line:sub(i):match "^hsl%(%s*(%d+)%s+(%d+)%%%s+(%d+)%%%s*%)()"
+      if not match_end then
+        return
+      end
     end
     h = tonumber(h)
     if h > 360 then
@@ -349,6 +356,7 @@ do
     local rgb_hex = tohex(bor(lshift(floor(r), 16), lshift(floor(g), 8), floor(b)), 6)
     return match_end - 1, rgb_hex
   end
+
   function css_fn.rgba(line, i)
     if #line < i + CSS_RGBA_FN_MINIMUM_LENGTH then
       return
@@ -356,7 +364,10 @@ do
     local r, g, b, a, match_end =
       line:sub(i):match "^rgba%(%s*(%d+%%?)%s*,%s*(%d+%%?)%s*,%s*(%d+%%?)%s*,%s*([.%d]+)%s*%)()"
     if not match_end then
-      return
+      local r, g, b, a, match_end = line:sub(i):match "^rgba%(%s*(%d+%%?)%s+(%d+%%?)%s+(%d+%%?)%s+([.%d]+)%s*%)()"
+      if not match_end then
+        return
+      end
     end
     a = tonumber(a)
     if not a or a > 1 then
@@ -377,13 +388,17 @@ do
     local rgb_hex = tohex(bor(lshift(floor(r * a), 16), lshift(floor(g * a), 8), floor(b * a)), 6)
     return match_end - 1, rgb_hex
   end
+
   function css_fn.hsla(line, i)
     if #line < i + CSS_HSLA_FN_MINIMUM_LENGTH then
       return
     end
     local h, s, l, a, match_end = line:sub(i):match "^hsla%(%s*(%d+)%s*,%s*(%d+)%%%s*,%s*(%d+)%%%s*,%s*([.%d]+)%s*%)()"
     if not match_end then
-      return
+      local h, s, l, a, match_end = line:sub(i):match "^hsla%(%s*(%d+)%s+(%d+)%%%s+(%d+)%%%s+([.%d]+)%s*%)()"
+      if not match_end then
+        return
+      end
     end
     a = tonumber(a)
     if not a or a > 1 then
@@ -744,6 +759,7 @@ local function setup(filetypes, user_default_options)
     local options = FILETYPE_OPTIONS[filetype] or SETUP_SETTINGS.default_options
     attach_to_buffer(nvim_get_current_buf(), options)
   end
+
   nvim.ex.augroup "ColorizerSetup"
   nvim.ex.autocmd_()
   if not filetypes then
