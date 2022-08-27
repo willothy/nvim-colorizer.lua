@@ -339,7 +339,7 @@ do
     end
     local h, s, l, match_end = line:sub(i):match "^hsl%(%s*(%d+)%s*,%s*(%d+)%%%s*,%s*(%d+)%%%s*%)()"
     if not match_end then
-      local h, s, l, match_end = line:sub(i):match "^hsl%(%s*(%d+)%s+(%d+)%%%s+(%d+)%%%s*%)()"
+      h, s, l, match_end = line:sub(i):match "^hsl%(%s*(%d+)%s+(%d+)%%%s+(%d+)%%%s*%)()"
       if not match_end then
         return
       end
@@ -371,7 +371,7 @@ do
     local r, g, b, a, match_end =
       line:sub(i):match "^rgba%(%s*(%d+%%?)%s*,%s*(%d+%%?)%s*,%s*(%d+%%?)%s*,%s*([.%d]+)%s*%)()"
     if not match_end then
-      local r, g, b, a, match_end = line:sub(i):match "^rgba%(%s*(%d+%%?)%s+(%d+%%?)%s+(%d+%%?)%s+([.%d]+)%s*%)()"
+      r, g, b, a, match_end = line:sub(i):match "^rgba%(%s*(%d+%%?)%s+(%d+%%?)%s+(%d+%%?)%s+([.%d]+)%s*%)()"
       if not match_end then
         return
       end
@@ -402,7 +402,7 @@ do
     end
     local h, s, l, a, match_end = line:sub(i):match "^hsla%(%s*(%d+)%s*,%s*(%d+)%%%s*,%s*(%d+)%%%s*,%s*([.%d]+)%s*%)()"
     if not match_end then
-      local h, s, l, a, match_end = line:sub(i):match "^hsla%(%s*(%d+)%s+(%d+)%%%s+(%d+)%%%s+([.%d]+)%s*%)()"
+      h, s, l, a, match_end = line:sub(i):match "^hsla%(%s*(%d+)%s+(%d+)%%%s+(%d+)%%%s+([.%d]+)%s*%)()"
       if not match_end then
         return
       end
@@ -431,6 +431,7 @@ do
     return match_end - 1, rgb_hex
   end
 end
+
 local css_function_parser, rgb_function_parser, hsl_function_parser
 do
   local CSS_FUNCTION_TRIE = Trie { "rgb", "rgba", "hsl", "hsla" }
