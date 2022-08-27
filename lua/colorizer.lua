@@ -329,7 +329,7 @@ do
     if not b then
       return
     end
-    local rgb_hex = tohex(bor(lshift(r, 16), lshift(g, 8), b), 6)
+    local rgb_hex = string.format("%02x%02x%02x", r, g, b)
     return match_end - 1, rgb_hex
   end
 
@@ -360,7 +360,7 @@ do
     if r == nil or g == nil or b == nil then
       return
     end
-    local rgb_hex = tohex(bor(lshift(floor(r), 16), lshift(floor(g), 8), floor(b)), 6)
+    local rgb_hex = string.format("%02x%02x%02x", r, g, b)
     return match_end - 1, rgb_hex
   end
 
@@ -392,7 +392,7 @@ do
     if not b then
       return
     end
-    local rgb_hex = tohex(bor(lshift(floor(r * a), 16), lshift(floor(g * a), 8), floor(b * a)), 6)
+    local rgb_hex = string.format("%02x%02x%02x", r * a, g * a, b * a)
     return match_end - 1, rgb_hex
   end
 
@@ -427,7 +427,7 @@ do
     if r == nil or g == nil or b == nil then
       return
     end
-    local rgb_hex = tohex(bor(lshift(floor(r * a), 16), lshift(floor(g * a), 8), floor(b * a)), 6)
+    local rgb_hex = string.format("%02x%02x%02x", r * a, g * a, b * a)
     return match_end - 1, rgb_hex
   end
 end
