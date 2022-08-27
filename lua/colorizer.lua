@@ -10,7 +10,6 @@ local autocmd = api.nvim_create_autocmd
 local set_highlight = api.nvim_set_hl
 
 local buf_add_highlight = api.nvim_buf_add_highlight
-local buf_attach = api.nvim_buf_attach
 local buf_clear_namespace = api.nvim_buf_clear_namespace
 local get_current_buf = api.nvim_get_current_buf
 local buf_get_option = api.nvim_buf_get_option
@@ -658,13 +657,18 @@ local FILETYPE_OPTIONS = {}
 
 local function rehighlight_buffer(buf, options)
   local ns = DEFAULT_NAMESPACE
-  if buf == 0 or buf == nil then
-    buf = get_current_buf()
-  end
   assert(options)
-  buf_clear_namespace(buf, ns, 0, -1)
-  local lines = buf_get_lines(buf, 0, -1, true)
-  highlight_buffer(buf, ns, lines, 0, options)
+  local a = vim.api.nvim_buf_call(buf, function()
+    return {
+      vim.fn.line "w0",
+      vim.fn.line "w$",
+    }
+  end)
+  local min_row = a[1] - 1
+  local max_row = a[2]
+  buf_clear_namespace(buf, ns, min_row, max_row)
+  local lines = buf_get_lines(buf, min_row, max_row, false)
+  highlight_buffer(buf, ns, lines, min_row, options)
 end
 
 local function new_buffer_options(buf)
@@ -682,6 +686,21 @@ local function is_buffer_attached(buf)
   return BUFFER_OPTIONS[buf] ~= nil
 end
 
+--- Stop highlighting the current buffer.
+-- @tparam[opt=0|nil] integer buf A value of 0 or nil implies the current buffer.
+-- @tparam[opt=DEFAULT_NAMESPACE] integer ns the namespace id.
+local function detach_from_buffer(buf, ns)
+  if buf == 0 or buf == nil then
+    buf = get_current_buf()
+  end
+  buf_clear_namespace(buf, ns or DEFAULT_NAMESPACE, 0, -1)
+  for _, id in ipairs(BUFFER_OPTIONS["autocmds"][buf]) do
+    pcall(api.nvim_del_autocmd, id)
+  end
+  BUFFER_OPTIONS["autocmds"][buf] = nil
+  BUFFER_OPTIONS[buf] = nil
+end
+
 --- Attach to a buffer and continuously highlight changes.
 -- @tparam[opt=0|nil] integer buf A value of 0 implies the current buffer.
 -- @param[opt] options Configuration options as described in `setup`
@@ -691,41 +710,54 @@ local function attach_to_buffer(buf, options)
     buf = get_current_buf()
   end
   local already_attached = BUFFER_OPTIONS[buf] ~= nil
-  local ns = DEFAULT_NAMESPACE
   if not options then
     options = new_buffer_options(buf)
   end
   BUFFER_OPTIONS[buf] = options
   rehighlight_buffer(buf, options)
+
   if already_attached then
     return
   end
-  -- send_buffer: true doesn't actually do anything in Lua (yet)
-  buf_attach(buf, false, {
-    on_lines = function(_, buffer, _, firstline, _, new_lastline)
-      -- This is used to signal stopping the handler highlights
-      if not BUFFER_OPTIONS[buffer] then
-        return true
+
+  local autocmds = {}
+  local au_group_id = augroup("ColorizerSetup", {})
+
+  autocmds[#autocmds + 1] = vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP" }, {
+    buffer = buf,
+    callback = function()
+      -- only reload if it was not disabled using :HighlightColorsOff
+      if BUFFER_OPTIONS[buf] then
+        rehighlight_buffer(buf, options)
       end
-      buf_clear_namespace(buffer, ns, firstline, new_lastline)
-      local lines = buf_get_lines(buffer, firstline, new_lastline, false)
-      highlight_buffer(buffer, ns, lines, firstline, BUFFER_OPTIONS[buffer])
-    end,
-    on_detach = function()
-      BUFFER_OPTIONS[buf] = nil
     end,
   })
-end
 
---- Stop highlighting the current buffer.
--- @tparam[opt=0|nil] integer buf A value of 0 or nil implies the current buffer.
--- @tparam[opt=DEFAULT_NAMESPACE] integer ns the namespace id.
-local function detach_from_buffer(buf, ns)
-  if buf == 0 or buf == nil then
-    buf = get_current_buf()
+  autocmds[#autocmds + 1] = vim.api.nvim_create_autocmd({ "WinScrolled" }, {
+    group = au_group_id,
+    buffer = buf,
+    callback = function()
+      -- only reload if it was not disabled using :HighlightColorsOff
+      if BUFFER_OPTIONS[buf] then
+        rehighlight_buffer(buf, options)
+      end
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ "BufUnload", "BufDelete", "BufHidden" }, {
+    group = au_group_id,
+    buffer = buf,
+    callback = function()
+      if BUFFER_OPTIONS[buf] then
+        detach_from_buffer(buf)
+      end
+    end,
+  })
+
+  if not BUFFER_OPTIONS["autocmds"] then
+    BUFFER_OPTIONS["autocmds"] = {}
   end
-  buf_clear_namespace(buf, ns or DEFAULT_NAMESPACE, 0, -1)
-  BUFFER_OPTIONS[buf] = nil
+  BUFFER_OPTIONS["autocmds"][buf] = autocmds
 end
 
 --- Easy to use function if you want the full setup without fine grained control.
@@ -806,12 +838,17 @@ local function setup(filetypes, user_default_options)
         SETUP_SETTINGS.exclusions[filetype:sub(2)] = true
       else
         FILETYPE_OPTIONS[filetype] = options
-        -- TODO What's the right mode for this? BufEnter?
-        autocmd("FileType", {
+        autocmd("BufWinEnter", {
           group = au_group_id,
           pattern = filetype,
           callback = function()
-            COLORIZER_SETUP_HOOK()
+            -- this should ideally be triggered one time per buffer
+            -- but BufWinEnter also triggers for split formation
+            -- but we don't want that so add a check using local buffer variable
+            local buf = get_current_buf()
+            if BUFFER_OPTIONS[buf] then
+              COLORIZER_SETUP_HOOK()
+            end
           end,
         })
       end
