@@ -511,8 +511,8 @@ local function create_highlight(rgb_hex, options)
     if mode == "foreground" then
       set_highlight(0, highlight_name, { fg = "#" .. rgb_hex })
     else
-      local r, g, b = rgb_hex:sub(1, 2), rgb_hex:sub(3, 4), rgb_hex:sub(5, 6)
-      r, g, b = tonumber(r, 16), tonumber(g, 16), tonumber(b, 16)
+      local rr, gg, bb = rgb_hex:sub(1, 2), rgb_hex:sub(3, 4), rgb_hex:sub(5, 6)
+      local r, g, b = tonumber(rr, 16), tonumber(gg, 16), tonumber(bb, 16)
       local fg_color
       if color_is_bright(r, g, b) then
         fg_color = "Black"
@@ -702,14 +702,14 @@ local function attach_to_buffer(buf, options)
   end
   -- send_buffer: true doesn't actually do anything in Lua (yet)
   buf_attach(buf, false, {
-    on_lines = function(event_type, buf, changed_tick, firstline, lastline, new_lastline)
+    on_lines = function(_, buffer, _, firstline, _, new_lastline)
       -- This is used to signal stopping the handler highlights
-      if not BUFFER_OPTIONS[buf] then
+      if not BUFFER_OPTIONS[buffer] then
         return true
       end
-      buf_clear_namespace(buf, ns, firstline, new_lastline)
-      local lines = buf_get_lines(buf, firstline, new_lastline, false)
-      highlight_buffer(buf, ns, lines, firstline, BUFFER_OPTIONS[buf])
+      buf_clear_namespace(buffer, ns, firstline, new_lastline)
+      local lines = buf_get_lines(buffer, firstline, new_lastline, false)
+      highlight_buffer(buffer, ns, lines, firstline, BUFFER_OPTIONS[buffer])
     end,
     on_detach = function()
       BUFFER_OPTIONS[buf] = nil
@@ -827,7 +827,7 @@ end
 
 --- Reload all of the currently active highlighted buffers.
 local function reload_all_buffers()
-  for buf, buffer_options in pairs(BUFFER_OPTIONS) do
+  for buf, _ in pairs(BUFFER_OPTIONS) do
     attach_to_buffer(buf)
   end
 end
