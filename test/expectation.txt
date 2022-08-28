@@ -1,28 +1,28 @@
 -- vim:ft=lua
-require("colorizer").attach_to_buffer(0, { css = true })
-
+require("colorizer").detach_from_buffer(0)
+require("colorizer").attach_to_buffer(0, { AARRGGBB = true, css = true, mode = "background" })
 --[[ SUCCESS
-#F0F
-#FF00FF
+0xFf32A14B 0xFf32A14B
+#32a14b
+
+#F0F #FF00FF #FFF00F8F #F0F #FF00FF
+#FF32A14B
 #FFF00F8F
- #F0F
- #FF00FF
- #FFF00F8F
- #F0F #F00
- #FF00FF #F00
- #FFF00F8F #F00
-Blue Gray LightBlue Gray100 White
+#F0F #F00
+#FF00FF #F00
+#FFF00F8F #F00
+
+blue gray lightblue gray100 white gold blue
+Blue LightBlue Gray100 White
 White
-#def
-#deadbeef
-rgba(200,30,0,0)
-rgb(0,0,0)
-rgb(10, 100 ,      100)
-hsl(300,50%,50%)
-hsla(300,50%,50%,0.5)
+
+#def #deadbeef
+
+rgb(0,0,0) rgb(10, 100 ,      100)
+rgba(200,30,0,1) rgba(200,30,0,0.5) 
+hsl(300,50%,50%) hsla(300,50%,50%,0.5)
 hsla(300,50%,50%,1.0000000000000001)
 hsla(360,50%,50%,1.0000000000000001)
-blue gray lightblue gray100 white gold blue
 ]]
 
 --[[ FAIL

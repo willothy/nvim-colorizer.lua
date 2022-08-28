@@ -1,14 +1,5 @@
--- TODO this is kinda shitty
-local function dirname(str, sep)
-  sep = sep or "/"
-  return str:match("(.*" .. sep .. ")")
-end
-
-local script_dir = dirname(arg[0])
-package.path = script_dir .. "/../lua/?.lua;" .. package.path
-
-local Trie = require "trie"
-local nvim = require "nvim"
+local Trie = require "colorizer.trie"
+local color_map = vim.api.nvim_get_color_map
 
 local function print_color_trie()
   local tohex = bit.tohex
@@ -20,7 +11,7 @@ local function print_color_trie()
   }
   local COLOR_MAP = {}
   local COLOR_TRIE = Trie()
-  for k, v in pairs(nvim.get_color_map()) do
+  for k, v in pairs(color_map()) do
     if not (COLOR_NAME_SETTINGS.strip_digits and k:match "%d+$") then
       COLOR_NAME_MINLEN = COLOR_NAME_MINLEN and min(#k, COLOR_NAME_MINLEN) or #k
       COLOR_NAME_MAXLEN = COLOR_NAME_MAXLEN and max(#k, COLOR_NAME_MAXLEN) or #k

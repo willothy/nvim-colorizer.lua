@@ -8,6 +8,7 @@ command("ColorizerAttachToBuffer", function()
   require("colorizer").attach_to_buffer(0)
 end, {})
 
+-- Stop highlighting the current buffer (detach).
 command("ColorizerDetachFromBuffer", function()
   require("colorizer").detach_from_buffer(0)
 end, {})

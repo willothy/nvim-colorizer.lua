@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>colorizer Docs</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>colorizer</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Fields">Fields</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/colorizer.html">colorizer</a></li>
+  <li><strong>buffer_utils</strong></li>
+  <li><a href="../modules/colorizer.color_utils.html">color_utils</a></li>
+  <li><a href="../modules/colorizer.matcher_utils.html">matcher_utils</a></li>
+  <li><a href="../modules/colorizer.trie.html">trie</a></li>
+  <li><a href="../modules/utils.html">utils</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>colorizer.buffer_utils</code></h1>
+<p>Helper functions to highlight buffer smartly</p>
+<p>
+
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#highlight_buffer">highlight_buffer (buf, ns, lines, line_start, options)</a></td>
+	<td class="summary">Highlight the buffer region.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rehighlight_buffer">rehighlight_buffer (buf, options)</a></td>
+	<td class="summary">Rehighlight the buffer if colorizer is active</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#HIGHLIGHT_MODE_NAMES">HIGHLIGHT_MODE_NAMES</a></td>
+	<td class="summary">Highlight mode which will be use to render the colour</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#DEFAULT_NAMESPACE">DEFAULT_NAMESPACE</a></td>
+	<td class="summary">Default namespace used in <a href="../modules/colorizer.buffer_utils.html#highlight_buffer">highlight_buffer</a> and <a href="../modules/colorizer.html#attach_to_buffer">colorizer.attach_to_buffer</a>.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "highlight_buffer"></a>
+    <strong>highlight_buffer (buf, ns, lines, line_start, options)</strong>
+    </dt>
+    <dd>
+    Highlight the buffer region.
+ Highlight starting from <code>line_start</code> (0-indexed) for each line described by <code>lines</code> in the
+ buffer <code>buf</code> and attach it to the namespace <code>ns</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">buf</span>
+         number: buffer id
+        </li>
+        <li><span class="parameter">ns</span>
+         number: The namespace id. Default is DEFAULT_NAMESPACE. Create it with <code>vim.api.create_namespace</code>
+        </li>
+        <li><span class="parameter">lines</span>
+         table: the lines to highlight from the buffer.
+        </li>
+        <li><span class="parameter">line_start</span>
+         number: line_start should be 0-indexed
+        </li>
+        <li><span class="parameter">options</span>
+         table: Configuration options as described in <code>setup</code>
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rehighlight_buffer"></a>
+    <strong>rehighlight_buffer (buf, options)</strong>
+    </dt>
+    <dd>
+    Rehighlight the buffer if colorizer is active
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">buf</span>
+         number: Buffer number
+        </li>
+        <li><span class="parameter">options</span>
+         table: Buffer options
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "HIGHLIGHT_MODE_NAMES"></a>
+    <strong>HIGHLIGHT_MODE_NAMES</strong>
+    </dt>
+    <dd>
+    Highlight mode which will be use to render the colour
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">background</span>
+
+
+
+        </li>
+        <li><span class="parameter">foreground</span>
+
+
+
+        </li>
+        <li><span class="parameter">virtualtext</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "DEFAULT_NAMESPACE"></a>
+    <strong>DEFAULT_NAMESPACE</strong>
+    </dt>
+    <dd>
+    Default namespace used in <a href="../modules/colorizer.buffer_utils.html#highlight_buffer">highlight_buffer</a> and <a href="../modules/colorizer.html#attach_to_buffer">colorizer.attach_to_buffer</a>.
+
+
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/colorizer.buffer_utils.html#highlight_buffer">highlight_buffer</a></li>
+         <li><a href="../modules/colorizer.html#attach_to_buffer">colorizer.attach_to_buffer</a></li>
+    </ul>
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-09-03 17:24:13 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

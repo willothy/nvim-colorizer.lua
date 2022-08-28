@@ -1,18 +1,21 @@
---- Trie implementation in luajit
--- Copyright © 2019 Ashkan Kiani
+---Trie implementation in luajit.
+--todo: write documentation
 
+-- Copyright © 2019 Ashkan Kiani
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation, either version 3 of the License, or
 -- (at your option) any later version.
-
+--
 -- This program is distributed in the hope that it will be useful,
 -- but WITHOUT ANY WARRANTY; without even the implied warranty of
 -- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 -- GNU General Public License for more details.
-
+--
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+--@module trie
 local ffi = require "ffi"
 
 ffi.cdef [[
@@ -47,11 +50,12 @@ local function trie_destroy(trie)
   ffi.C.free(trie)
 end
 
-local INDEX_LOOKUP_TABLE = ffi.new "uint8_t[256]"
+local total_char = 255
+local INDEX_LOOKUP_TABLE = ffi.new("uint8_t[?]", total_char)
 local CHAR_LOOKUP_TABLE = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 do
   local b = string.byte
-  for i = 0, 255 do
+  for i = 0, total_char do
     if i >= b "0" and i <= b "9" then
       INDEX_LOOKUP_TABLE[i] = i - b "0"
     elseif i >= b "A" and i <= b "Z" then
@@ -59,7 +63,7 @@ do
     elseif i >= b "a" and i <= b "z" then
       INDEX_LOOKUP_TABLE[i] = i - b "a" + 10 + 26
     else
-      INDEX_LOOKUP_TABLE[i] = 255
+      INDEX_LOOKUP_TABLE[i] = total_char
     end
   end
 end
@@ -71,7 +75,7 @@ local function trie_insert(trie, value)
   local node = trie
   for i = 1, #value do
     local index = INDEX_LOOKUP_TABLE[value:byte(i)]
-    if index == 255 then
+    if index == total_char then
       return false
     end
     if node.character[index] == nil then
@@ -90,7 +94,7 @@ local function trie_search(trie, value, start)
   local node = trie
   for i = (start or 1), #value do
     local index = INDEX_LOOKUP_TABLE[value:byte(i)]
-    if index == 255 then
+    if index == total_char then
       return
     end
     local child = node.character[index]
@@ -113,7 +117,7 @@ local function trie_longest_prefix(trie, value, start)
   for i = start, #value do
     local index = INDEX_LOOKUP_TABLE[value:byte(i)]
     --		local index = INDEX_LOOKUP_TABLE[bor(insensitive, value:byte(i))]
-    if index == 255 then
+    if index == total_char then
       break
     end
     local child = node.character[index]
@@ -189,7 +193,7 @@ local function print_trie_table(s)
   end
   local lines = {}
   for _, child in ipairs(s.children) do
-    local child_lines = print_trie_table(child, thicc)
+    local child_lines = print_trie_table(child)
     for _, child_line in ipairs(child_lines) do
       table.insert(lines, child_line)
     end
@@ -242,6 +246,7 @@ local Trie_mt = {
     search = trie_search,
     longest_prefix = trie_longest_prefix,
     extend = trie_extend,
+    destroy = trie_destroy,
   },
   __tostring = trie_to_string,
   __gc = trie_destroy,

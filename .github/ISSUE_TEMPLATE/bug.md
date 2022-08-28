@@ -3,7 +3,7 @@ name: Bug
 about: Create a bug report
 title: 'Bug:'
 labels: bug
-assignees: norcalli
+assignees: akianonymus
 
 ---
 

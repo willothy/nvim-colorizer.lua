@@ -1,6 +1,6 @@
 # colorizer.lua
 
-[![luadoc](https://img.shields.io/badge/luadoc-0.1-blue)](https://norcalli.github.io/luadoc/nvim-colorizer.lua/modules/colorizer.html)
+[![luadoc](https://img.shields.io/badge/luadoc-0.1-blue)](https://akianonymus.github.io/luadoc/nvim-colorizer.lua/modules/colorizer.html)
 
 A high-performance color highlighter for Neovim which has **no external dependencies**! Written in performant Luajit.
 
@@ -10,14 +10,14 @@ A high-performance color highlighter for Neovim which has **no external dependen
 
 ## Installation and Usage
 
-Requires Neovim >= 0.4.0 and `set termguicolors` (I'm looking into relaxing
-these constraints). If you don't have true color for your terminal or are
+Requires Neovim >= 0.6.0 and `set termguicolors`.
+If you don't have true color for your terminal or are
 unsure, [read this excellent guide](https://github.com/termstandard/colors).
 
 Use your plugin manager or clone directly into your package.
 
 ```lua
-use 'NvChad/nvim-colorizer.lua'
+use 'Akianonymus/nvim-colorizer.lua'
 ```
 
 As long as you have `malloc()` and `free()` on your system, this will work.
@@ -25,13 +25,37 @@ Which includes Linux, OSX, and Windows.
 
 One line setup. This will create an `autocmd` for `FileType *` to highlight
 every filetype.
+
 **NOTE**: You should add this line after/below where your plugins are setup.
 
 ```lua
 require'colorizer'.setup()
 ```
 
-### Why another highlighter?
+### Use with commands
+
+| Command  | Description  |
+|---|---|
+| **ColorizerAttachToBuffer**  | Attach to the current buffer with given or default settings  |
+| **ColorizerDetachFromBuffer**  | Stop highlighting the current buffer |
+| **ColorizerReloadAllBuffers**  | Reload all buffers that are being highlighted currently |
+| **ColorizerToggle**  | Toggle highlighting of the current buffer  |
+
+### Use from lua
+
+```lua
+
+-- All options that can be passed to `user_default_options` in setup() can be passed here
+-- Similar for other functions
+
+-- Attach to buffer
+require("colorizer").attach_to_buffer(0, { mode = "background", css = true})
+
+-- Detach from buffer
+require("colorizer").detach_from_buffer(0, { mode = "virtualtext", css = true})
+
+```
+## Why another highlighter?
 
 Mostly, **RAW SPEED**.
 
@@ -43,24 +67,40 @@ handwritten parser, updates can be done in real time. There are plugins such as
 performance, but it has some difficulty with becoming out of sync. The downside
 is that _this only works for Neovim_, and that will never change.
 
+Apart from that, it only applies the highlights to the current visible contents, so
+even if a big file is opened, the editor won't just choke on a blank screen.
+
+This idea was copied from
+ [brenoprata10/nvim-highlight-colors](https://github.com/brenoprata10/nvim-highlight-colors.)
+Credits to [brenoprata10](https://github.com/brenoprata10)
+
 Additionally, having a Lua API that's available means users can use this as a
 library to do custom highlighting themselves.
 
-### Customization
+## Customization
+
+**Note**: These are the default options
 
 ```lua
-  DEFAULT_OPTIONS = {
-	RGB      = true;         -- #RGB hex codes
-	RRGGBB   = true;         -- #RRGGBB hex codes
-	names    = true;         -- "Name" codes like Blue oe blue
-	RRGGBBAA = false;        -- #RRGGBBAA hex codes
-	rgb_fn   = false;        -- CSS rgb() and rgba() functions
-	hsl_fn   = false;        -- CSS hsl() and hsla() functions
-	css      = false;        -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
-	css_fn   = false;        -- Enable all CSS *functions*: rgb_fn, hsl_fn
-	-- Available modes: foreground, background, virtualtext
-	mode     = 'background'; -- Set the display mode.
-  }
+  require("colorizer").setup {
+      filetypes = { "*" },
+      user_default_options = {
+        RGB = true, -- #RGB hex codes
+        RRGGBB = true, -- #RRGGBB hex codes
+        names = true, -- "Name" codes like Blue or blue
+        RRGGBBAA = false, -- #RRGGBBAA hex codes
+        AARRGGBB = false, -- 0xAARRGGBB hex codes
+        rgb_fn = false, -- CSS rgb() and rgba() functions
+        hsl_fn = false, -- CSS hsl() and hsla() functions
+        css = false, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
+        css_fn = false, -- Enable all CSS *functions*: rgb_fn, hsl_fn
+        -- Available modes for `mode`: foreground, background,  virtualtext
+        mode = "background", -- Set the display mode.
+        virtualtext = "■",
+      },
+      -- all the sub-options of filetypes apply to buftypes
+      buftypes = {},
+    }
 ```
 
 MODES:
@@ -78,78 +118,78 @@ require 'colorizer'.setup()
 -- Attach to certain Filetypes, add special configuration for `html`
 -- Use `background` for everything else.
 require 'colorizer'.setup {
-  'css';
-  'javascript';
-  html = {
-    mode = 'foreground';
-  }
+  filetypes = {
+    'css',
+    'javascript',
+    html = { mode = 'foreground'; }
+  },
 }
 
 -- Use the `default_options` as the second parameter, which uses
 -- `foreground` for every mode. This is the inverse of the previous
 -- setup configuration.
-require 'colorizer'.setup({
-  'css';
-  'javascript';
-  html = { mode = 'background' };
-}, { mode = 'foreground' })
+require 'colorizer'.setup {
+  filetypes = {
+    'css',
+    'javascript',
+    html = { mode = 'foreground'; }
+  },
+  user_default_options = { mode = "background", },
+}
 
 -- Use the `default_options` as the second parameter, which uses
 -- `foreground` for every mode. This is the inverse of the previous
 -- setup configuration.
 require 'colorizer'.setup {
-  '*'; -- Highlight all files, but customize some others.
-  css = { rgb_fn = true; }; -- Enable parsing rgb(...) functions in css.
-  html = { names = false; } -- Disable parsing "names" like Blue or Gray
+  filetypes = {
+    '*'; -- Highlight all files, but customize some others.
+    css = { rgb_fn = true; }; -- Enable parsing rgb(...) functions in css.
+    html = { names = false; } -- Disable parsing "names" like Blue or Gray
+  },
 }
 
 -- Exclude some filetypes from highlighting by using `!`
 require 'colorizer'.setup {
-  '*'; -- Highlight all files, but customize some others.
-  '!vim'; -- Exclude vim from highlighting.
+  filetypes = {
+    '*'; -- Highlight all files, but customize some others.
+    '!vim'; -- Exclude vim from highlighting.
   -- Exclusion Only makes sense if '*' is specified!
+  },
 }
+
 ```
 
-For lower level interface, see the [LuaDocs for API details](https://norcalli.github.io/luadoc/nvim-colorizer.lua/modules/colorizer.html) or use `:h colorizer.lua` once installed.
+All the above examples can also be apply to buftypes. Also no buftypes trigger colorizer by default
 
-## Commands
+Buftype value is fetched by `vim.bo.buftype`
 
-```help
-|:ColorizerAttachToBuffer|
-
-Attach to the current buffer and start highlighting with the settings as
-specified in setup (or the defaults).
-
-If the buffer was already attached (i.e. being highlighted), the settings will
-be reloaded with the ones from setup. This is useful for reloading settings
-for just one buffer.
-
-|:ColorizerDetachFromBuffer|
-
-Stop highlighting the current buffer (detach).
-
-|:ColorizerReloadAllBuffers|
-
-Reload all buffers that are being highlighted with new settings from the setup
-settings (or the defaults). Shortcut for ColorizerAttachToBuffer on every
-buffer.
-
-|:ColorizerToggle|
-
-Toggle highlighting of the current buffer.
+```lua
+-- need to specify buftypes
+require 'colorizer'.setup(
+  buftypes = {
+      "*",
+      -- exclude prompt and popup buftypes from highlight
+      "!prompt",
+      "!popup",
+    }
+)
 ```
 
-## Caveats
+For lower level interface, see the [LuaDocs for API details](https://akianonymus.github.io/luadoc/nvim-colorizer.lua/modules/colorizer.html) or use `:h colorizer` once installed.
 
-If the file you are editing has no filetype, the plugin won't be attached, as
-it relies on AutoCmd to do so. You can still make it work by running the
-following command: `:ColorizerAttachToBuffer`
+## Extras
 
-See [this comment](https://github.com/norcalli/nvim-colorizer.lua/issues/9#issuecomment-543742619) for more information.
+Documentaion is generated using ldoc. See
+[scripts/gen_docs.sh](https://github.com/Akianonymus/nvim-colorizer.lua/blob/master/scripts/gen_docs.sh)
 
 ## TODO
 
-- [ ] Add more display modes?
+- [ ] Add more colour types ( var, advanced css functions )
+- [ ] Add more display modes. E.g - sign column
 - [ ] Use a more space efficient trie implementation.
-- [ ] Create a COMMON_SETUP which does obvious things like enable `rgb_fn` for css
+
+## Similar projects
+
+[nvim-highlight-colors](https://github.com/brenoprata10/nvim-highlight-colors)
+
+[vim-hexokinase](https://github.com/RRethy/vim-hexokinase)
