@@ -1,12 +1,10 @@
 # colorizer.lua
 
-[![luadoc](https://img.shields.io/badge/luadoc-0.1-blue)](https://akianonymus.github.io/luadoc/nvim-colorizer.lua/modules/colorizer.html)
+[![luadoc](https://img.shields.io/badge/luadoc-0.1-blue)](https://akianonymus.github.io/nvim-colorizer.lua)
 
 A high-performance color highlighter for Neovim which has **no external dependencies**! Written in performant Luajit.
 
 ![Demo.gif](https://raw.githubusercontent.com/norcalli/github-assets/master/nvim-colorizer.lua-demo-short.gif)
-
-![Demo.mp4](https://raw.githubusercontent.com/norcalli/github-assets/master/nvim-colorizer.lua-demo-short.mp4)
 
 ## Installation and Usage
 
