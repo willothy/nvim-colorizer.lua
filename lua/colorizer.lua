@@ -281,15 +281,10 @@ local function setup(config)
 
   local conf = vim.deepcopy(config)
 
-  -- TODO: Remove conf[1] style
-  -- Mostly here to not break existing setups
-  local filetypes = conf.filetypes
-  local user_default_options = conf.user_default_options
-  local buftypes = conf.buftypes
-  -- if nothing given the enable for all filtypes
-  filetypes = filetypes or conf[1] or { "*" }
-  user_default_options = user_default_options or conf[2] or {}
-  buftypes = buftypes or conf[3] or nil
+  -- if nothing given the enable for all filetypes
+  local filetypes = conf.filetypes or conf[1] or { "*" }
+  local user_default_options = conf.user_default_options or conf[2] or {}
+  local buftypes = conf.buftypes or conf[3] or nil
 
   OPTIONS = { buf = {}, file = {} }
   SETUP_SETTINGS = {
