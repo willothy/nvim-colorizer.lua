@@ -301,7 +301,14 @@ local function setup(config)
   local function COLORIZER_SETUP_HOOK(typ)
     local filetype = vim.bo.filetype
     local buftype = vim.bo.buftype
+    local buf = current_buf()
     if SETUP_SETTINGS.exclusions.file[filetype] or SETUP_SETTINGS.exclusions.buf[buftype] then
+      -- when a filetype is disabled but buftype is enabled, it can Attach in
+      -- some cases, so manually detach
+      if BUFFER_OPTIONS[buf] then
+        detach_from_buffer(buf)
+      end
+      BUFFER_INIT[buf] = nil
       return
     end
 
@@ -324,7 +331,6 @@ local function setup(config)
     -- this should ideally be triggered one time per buffer
     -- but BufWinEnter also triggers for split formation
     -- but we don't want that so add a check using local buffer variable
-    local buf = current_buf()
     if not BUFFER_INIT[buf] then
       attach_to_buffer(buf, options, typ)
     end
