@@ -174,11 +174,12 @@ $(indent("", 2)){$(name)} - $(M(item.params.map[p],item))
 
 $(indentstr)returns:~
 #   for i,group in ldoc.ipairs(groups) do local li,il = use_li(group)
-#   for r in group:iter() do local type, ctypes = item:return_type(r); local rt = ldoc.typename(type)
+#   for r in group:iter() do 
+#   local type, ctypes = item:return_type(r); local rt = ldoc.typename(type)
 #     if rt ~= '' then
            $(rt)
 #     end
-$(indent("", 2))$(r.text)
+$(indent("", 2))$(r.text:gsub("|", " or "))
 #    if ctypes then
 #    for c in ctypes:iter() do
             $(c.name)

@@ -87,23 +87,53 @@ local AUGROUP_ID
 local AUGROUP_NAME = "ColorizerSetup"
 -- buffer specific options given in setup
 local BUFFER_OPTIONS = {}
--- store boolean for buffer if it is initialzed
-local BUFFER_INIT = {}
--- store buffer local autocmd(s) id
-local BUFFER_AUTOCMDS = {}
+-- buffer local options created after setup
+local BUFFER_LOCAL = {}
 
+---defaults options.
+--<pre>
+--  user_default_options = {
+--      RGB = true, -- #RGB hex codes
+--      RRGGBB = true, -- #RRGGBB hex codes
+--      names = true, -- "Name" codes like Blue or blue
+--      RRGGBBAA = false, -- #RRGGBBAA hex codes
+--      AARRGGBB = false, -- 0xAARRGGBB hex codes
+--      rgb_fn = false, -- CSS rgb() and rgba() functions
+--      hsl_fn = false, -- CSS hsl() and hsla() functions
+--      css = false, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
+--      css_fn = false, -- Enable all CSS *functions*: rgb_fn, hsl_fn
+--      -- Available modes for `mode`: foreground, background,  virtualtext
+--      mode = "background", -- Set the display mode.
+--      -- Available methods are false / "normal" / "lsp" / "both"
+--      tailwind = false -- Enable tailwind colors
+--      virtualtext = "■",
+--  }
+--</pre>
+---@table user_default_options
+--@field RGB boolean
+--@field RRGGBB boolean
+--@field names boolean
+--@field RRGGBBAA boolean
+--@field AARRGGBB boolean
+--@field rgb_fn boolean
+--@field hsl_fn boolean
+--@field css boolean
+--@field css_fn boolean
+--@field mode string
+--@field tailwind boolean|string
+--@field virtualtext string
 local USER_DEFAULT_OPTIONS = {
-  RGB = true, -- #RGB hex codes
-  RRGGBB = true, -- #RRGGBB hex codes
-  names = true, -- "Name" codes like Blue or blue
-  RRGGBBAA = false, -- #RRGGBBAA hex codes
-  AARRGGBB = false, -- 0xAARRGGBB hex codes
-  rgb_fn = false, -- CSS rgb() and rgba() functions
-  hsl_fn = false, -- CSS hsl() and hsla() functions
-  css = false, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
-  css_fn = false, -- Enable all CSS *functions*: rgb_fn, hsl_fn
-  -- Available modes: foreground, background, virtualtext
-  mode = "background", -- Set the display mode.
+  RGB = true,
+  RRGGBB = true,
+  names = true,
+  RRGGBBAA = false,
+  AARRGGBB = false,
+  rgb_fn = false,
+  hsl_fn = false,
+  css = false,
+  css_fn = false,
+  mode = "background",
+  tailwind = "lsp",
   virtualtext = "■",
 }
 
@@ -158,12 +188,22 @@ local function detach_from_buffer(buf, ns)
   end
 
   clear_namespace(buf, ns or DEFAULT_NAMESPACE, 0, -1)
-  for _, id in ipairs(BUFFER_AUTOCMDS[buf] or {}) do
-    pcall(api.nvim_del_autocmd, id)
+  if BUFFER_LOCAL[buf] then
+    if BUFFER_LOCAL[buf].__tailwind_ns then
+      clear_namespace(buf, BUFFER_LOCAL[buf].__tailwind_ns, 0, -1)
+      if type(BUFFER_LOCAL[buf].__tailwind_detach) == "function" then
+        BUFFER_LOCAL[buf].__tailwind_detach()
+      end
+    end
+
+    for _, id in ipairs(BUFFER_LOCAL[buf].__autocmds or {}) do
+      pcall(api.nvim_del_autocmd, id)
+    end
+
+    BUFFER_LOCAL[buf].__autocmds = nil
   end
   -- because now the buffer is not visible, so delete its information
   BUFFER_OPTIONS[buf] = nil
-  BUFFER_AUTOCMDS[buf] = nil
 end
 
 ---Attach to a buffer and continuously highlight changes.
@@ -191,11 +231,15 @@ local function attach_to_buffer(buf, options, typ)
   end
 
   BUFFER_OPTIONS[buf] = options
-  rehighlight_buffer(buf, options)
 
-  BUFFER_INIT[buf] = true
+  BUFFER_LOCAL[buf] = BUFFER_LOCAL[buf] or {}
+  local tailwind_ns, tailwind_detach = rehighlight_buffer(buf, options)
+  BUFFER_LOCAL[buf].__tailwind_ns = tailwind_ns
+  BUFFER_LOCAL[buf].__tailwind_detach = tailwind_detach
 
-  if BUFFER_AUTOCMDS[buf] then
+  BUFFER_LOCAL[buf].__init = true
+
+  if BUFFER_LOCAL[buf].__autocmds then
     return
   end
 
@@ -208,7 +252,7 @@ local function attach_to_buffer(buf, options, typ)
     callback = function()
       -- only reload if it was not disabled using detach_from_buffer
       if BUFFER_OPTIONS[buf] then
-        rehighlight_buffer(buf, options)
+        rehighlight_buffer(buf, options, BUFFER_LOCAL[buf])
       end
     end,
   })
@@ -219,7 +263,7 @@ local function attach_to_buffer(buf, options, typ)
     callback = function()
       -- only reload if it was not disabled using detach_from_buffer
       if BUFFER_OPTIONS[buf] then
-        rehighlight_buffer(buf, options)
+        rehighlight_buffer(buf, options, BUFFER_LOCAL[buf])
       end
     end,
   })
@@ -231,11 +275,12 @@ local function attach_to_buffer(buf, options, typ)
       if BUFFER_OPTIONS[buf] then
         detach_from_buffer(buf)
       end
-      BUFFER_INIT[buf] = nil
+      BUFFER_LOCAL[buf].__init = nil
     end,
   })
 
-  BUFFER_AUTOCMDS[buf] = autocmds
+  BUFFER_LOCAL[buf].__autocmds = autocmds
+  BUFFER_LOCAL[buf].__augroup_id = au_group_id
 end
 
 ---Easy to use function if you want the full setup without fine grained control.
@@ -251,24 +296,12 @@ end
 --<pre>
 --    require("colorizer").setup {
 --      filetypes = { "*" },
---      user_default_options = {
---        RGB = true, -- #RGB hex codes
---        RRGGBB = true, -- #RRGGBB hex codes
---        names = true, -- "Name" codes like Blue or blue
---        RRGGBBAA = false, -- #RRGGBBAA hex codes
---        AARRGGBB = false, -- 0xAARRGGBB hex codes
---        rgb_fn = false, -- CSS rgb() and rgba() functions
---        hsl_fn = false, -- CSS hsl() and hsla() functions
---        css = false, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
---        css_fn = false, -- Enable all CSS *functions*: rgb_fn, hsl_fn
---        -- Available modes for `mode`: foreground, background,  virtualtext
---        mode = "background", -- Set the display mode.
---        virtualtext = "■",
---      },
+--      user_default_options,
 --      -- all the sub-options of filetypes apply to buftypes
 --      buftypes = {},
 --    }
 --</pre>
+--For all user_default_options, see |user_default_options|
 ---@param config table: Config containing above parameters.
 ---@usage `require'colorizer'.setup()`
 local function setup(config)
@@ -297,13 +330,15 @@ local function setup(config)
     local filetype = vim.bo.filetype
     local buftype = vim.bo.buftype
     local buf = current_buf()
+    BUFFER_LOCAL[buf] = BUFFER_LOCAL[buf] or {}
+
     if SETUP_SETTINGS.exclusions.file[filetype] or SETUP_SETTINGS.exclusions.buf[buftype] then
       -- when a filetype is disabled but buftype is enabled, it can Attach in
       -- some cases, so manually detach
       if BUFFER_OPTIONS[buf] then
         detach_from_buffer(buf)
       end
-      BUFFER_INIT[buf] = nil
+      BUFFER_LOCAL[buf].__init = nil
       return
     end
 
@@ -326,7 +361,7 @@ local function setup(config)
     -- this should ideally be triggered one time per buffer
     -- but BufWinEnter also triggers for split formation
     -- but we don't want that so add a check using local buffer variable
-    if not BUFFER_INIT[buf] then
+    if not BUFFER_LOCAL[buf].__init then
       attach_to_buffer(buf, options, typ)
     end
   end
