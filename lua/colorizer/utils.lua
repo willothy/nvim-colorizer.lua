@@ -86,11 +86,12 @@ local function parse_hex(byte)
   return rshift(BYTE_CATEGORY[byte], 4)
 end
 
+local b_percent = string.byte "%"
 --- Obvious.
 ---@param v string
 ---@return number|nil
 local function percent_or_hex(v)
-  if v:sub(-1, -1) == "%" then
+  if v:byte(-1) == b_percent then
     return tonumber(v:sub(1, -2)) / 100 * 255
   end
   local x = tonumber(v)
