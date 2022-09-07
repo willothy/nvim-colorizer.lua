@@ -52,7 +52,7 @@ end
 
 local total_char = 255
 local INDEX_LOOKUP_TABLE = ffi.new("uint8_t[?]", total_char)
-local CHAR_LOOKUP_TABLE = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+local CHAR_LOOKUP_TABLE = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
 do
   local b = string.byte
   local extra_char = {
@@ -111,7 +111,7 @@ local function trie_search(trie, value, start)
   return node.is_leaf
 end
 
-local function trie_longest_prefix(trie, value, start)
+local function trie_longest_prefix(trie, value, start, exact)
   if trie == nil then
     return false
   end
@@ -138,7 +138,9 @@ local function trie_longest_prefix(trie, value, start)
     -- Avoid a copy if the whole string is a match.
     if start == 1 and last_i == #value then
       return value
-    else
+    end
+
+    if not exact then
       return value:sub(start, last_i)
     end
   end

@@ -161,7 +161,7 @@ function highlight_buffer(buf, ns, lines, line_start, options, options_local)
     local i = 1
     while i < #line do
       local length, rgb_hex = loop_parse_fn(line, i)
-      if length then
+      if length and rgb_hex then
         local name = create_highlight(rgb_hex, mode)
         local d = data[current_linenum] or {}
         table.insert(d, { name = name, range = { i - 1, i + length - 1 } })
