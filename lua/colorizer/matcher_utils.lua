@@ -71,7 +71,7 @@ local function make_matcher(options)
     + (enable_AARRGGBB and 1 or 4)
     + (enable_rgb and 1 or 5)
     + (enable_hsl and 1 or 6)
-    + (enable_tailwind == "normal" and 1 or 7)
+    + ((enable_tailwind == true or enable_tailwind == "normal") and 1 or 7)
     + (enable_tailwind == "lsp" and 1 or 8)
     + (enable_tailwind == "both" and 1 or 9)
 

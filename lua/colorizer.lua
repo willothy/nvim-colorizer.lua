@@ -104,7 +104,8 @@ local BUFFER_LOCAL = {}
 --      css_fn = false, -- Enable all CSS *functions*: rgb_fn, hsl_fn
 --      -- Available modes for `mode`: foreground, background,  virtualtext
 --      mode = "background", -- Set the display mode.
---      -- Available methods are false / "normal" / "lsp" / "both"
+--      -- Available methods are false / true / "normal" / "lsp" / "both"
+--      -- True is same as normal
 --      tailwind = false -- Enable tailwind colors
 --      virtualtext = "■",
 --  }
@@ -133,7 +134,7 @@ local USER_DEFAULT_OPTIONS = {
   css = false,
   css_fn = false,
   mode = "background",
-  tailwind = "lsp",
+  tailwind = false,
   virtualtext = "■",
 }
 

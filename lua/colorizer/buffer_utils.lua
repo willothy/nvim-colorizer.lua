@@ -188,7 +188,10 @@ function highlight_buffer(buf, ns, lines, line_start, options, options_local)
         local ok, client = pcall(vim.lsp.get_client_by_id, args.data.client_id)
         if ok then
           if client.name == "tailwindcss" and client.supports_method "textDocument/documentColor" then
-            highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, mode, options)
+            -- wait 100 ms for the first request
+            vim.defer_fn(function()
+              highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, mode, options)
+            end, 100)
             TW_LSP_ATTACHED[buf] = true
           end
         end

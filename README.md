@@ -94,7 +94,8 @@ library to do custom highlighting themselves.
         css_fn = false, -- Enable all CSS *functions*: rgb_fn, hsl_fn
         -- Available modes for `mode`: foreground, background,  virtualtext
         mode = "background", -- Set the display mode.
-        -- Available methods are false / "normal" / "lsp" / "both"
+        -- Available methods are false / true / "normal" / "lsp" / "both"
+        -- True is same as normal
         tailwind = false -- Enable tailwind colors
         virtualtext = "■",
       },

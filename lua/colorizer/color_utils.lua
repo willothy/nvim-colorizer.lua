@@ -86,7 +86,7 @@ local function color_name_parser(line, i, opts)
       end
     end
     if opts and opts.tailwind then
-      if opts.tailwind == "normal" or opts.tailwind == "both" then
+      if opts.tailwind == true or opts.tailwind == "normal" or opts.tailwind == "both" then
         local tailwind = require "colorizer.tailwind_colors"
         -- setup tailwind colors
         for k, v in pairs(tailwind.colors) do
