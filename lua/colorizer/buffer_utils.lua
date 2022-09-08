@@ -141,9 +141,9 @@ local function highlight_buffer_tailwind(buf, ns, mode, options)
   end, 10)
 end
 
-local TW_LSP_ATTACHED = {}
 local TW_LSP_AU_CREATED = {}
 local TW_LSP_AU_ID = {}
+local TW_LSP_CLIENT = {}
 --- Highlight the buffer region.
 -- Highlight starting from `line_start` (0-indexed) for each line described by `lines` in the
 -- buffer `buf` and attach it to the namespace `ns`.
@@ -191,45 +191,72 @@ function highlight_buffer(buf, ns, lines, line_start, line_end, options, options
     return
   end
 
-  -- create the autocmds so tailwind colours only activate when tailwindcss lsp is active
-  if not TW_LSP_AU_CREATED[buf] then
-    TW_LSP_AU_ID[buf] = {}
-    TW_LSP_AU_ID[buf][1] = api.nvim_create_autocmd("LspAttach", {
-      group = options_local.__augroup_id,
-      buffer = buf,
-      callback = function(args)
-        local ok, client = pcall(vim.lsp.get_client_by_id, args.data.client_id)
-        if ok then
-          if client.name == "tailwindcss" and client.supports_method "textDocument/documentColor" then
-            -- wait 100 ms for the first request
-            vim.defer_fn(function()
-              highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, mode, options)
-            end, 100)
-            TW_LSP_ATTACHED[buf] = true
-          end
-        end
-      end,
-    })
+  if not TW_LSP_CLIENT[buf] or TW_LSP_CLIENT[buf].is_stopped() then
     local function del_tailwind_stuff()
-      pcall(api.nvim_del_autocmd, TW_LSP_AU_ID[buf][1])
-      pcall(api.nvim_del_autocmd, TW_LSP_AU_ID[buf][2])
-      TW_LSP_ATTACHED[buf], TW_LSP_AU_CREATED[buf], TW_LSP_AU_ID[buf] = nil, nil, nil
+      TW_LSP_CLIENT[buf] = nil
     end
-    -- make sure the autocmds are deleted after lsp server is closed
-    TW_LSP_AU_ID[buf][2] = api.nvim_create_autocmd("LspDetach", {
-      group = options_local.__augroup_id,
-      buffer = buf,
-      callback = function()
-        del_tailwind_stuff()
-        clear_namespace(buf, DEFAULT_NAMESPACE_TAILWIND, 0, -1)
-      end,
-    })
-    TW_LSP_AU_CREATED[buf] = true
+    if vim.version().minor >= 8 then
+      -- create the autocmds so tailwind colours only activate when tailwindcss lsp is active
+      function del_tailwind_stuff()
+        pcall(api.nvim_del_autocmd, TW_LSP_AU_ID[buf][1])
+        pcall(api.nvim_del_autocmd, TW_LSP_AU_ID[buf][2])
+        TW_LSP_AU_CREATED[buf], TW_LSP_AU_ID[buf], TW_LSP_CLIENT[buf] = nil, nil, nil
+      end
+
+      if not TW_LSP_AU_CREATED[buf] then
+        TW_LSP_AU_ID[buf], TW_LSP_AU_CREATED[buf], TW_LSP_CLIENT[buf] = {}, nil, nil
+        TW_LSP_AU_ID[buf][1] = api.nvim_create_autocmd("LspAttach", {
+          group = options_local.__augroup_id,
+          buffer = buf,
+          callback = function(args)
+            local ok, client = pcall(vim.lsp.get_client_by_id, args.data.client_id)
+            if ok then
+              if client.name == "tailwindcss" and client.supports_method "textDocument/documentColor" then
+                -- wait 100 ms for the first request
+                TW_LSP_CLIENT[buf] = client
+                vim.defer_fn(function()
+                  highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, mode, options)
+                end, 100)
+              end
+            end
+          end,
+        })
+        -- make sure the autocmds are deleted after lsp server is closed
+        TW_LSP_AU_ID[buf][2] = api.nvim_create_autocmd("LspDetach", {
+          group = options_local.__augroup_id,
+          buffer = buf,
+          callback = function()
+            del_tailwind_stuff()
+            clear_namespace(buf, DEFAULT_NAMESPACE_TAILWIND, 0, -1)
+          end,
+        })
+        TW_LSP_AU_CREATED[buf] = true
+      end
+    end
+
+    TW_LSP_CLIENT[buf] = nil
+
+    local tailwind_client = vim.lsp.get_active_clients { bufnr = buf, name = "tailwindcss" }
+    if vim.tbl_isempty(tailwind_client) then
+      return DEFAULT_NAMESPACE_TAILWIND, del_tailwind_stuff
+    end
+
+    if not tailwind_client[1] or not tailwind_client[1].supports_method "textDocument/documentColor" then
+      return DEFAULT_NAMESPACE_TAILWIND, del_tailwind_stuff
+    end
+
+    TW_LSP_CLIENT[buf] = tailwind_client[1]
+
+    -- wait 100 ms for the first request
+    vim.defer_fn(function()
+      highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, mode, options)
+    end, 100)
+
     return DEFAULT_NAMESPACE_TAILWIND, del_tailwind_stuff
   end
 
   -- only try to do tailwindcss highlight if lsp is attached
-  if TW_LSP_ATTACHED[buf] then
+  if TW_LSP_CLIENT[buf] then
     highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, mode, options)
   end
 end
