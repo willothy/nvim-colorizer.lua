@@ -250,10 +250,17 @@ local function attach_to_buffer(buf, options, typ)
   autocmds[#autocmds + 1] = autocmd({ "TextChanged", "TextChangedI", "TextChangedP" }, {
     group = au_group_id,
     buffer = buf,
-    callback = function()
+    callback = function(args)
       -- only reload if it was not disabled using detach_from_buffer
       if BUFFER_OPTIONS[buf] then
-        rehighlight_buffer(buf, options, BUFFER_LOCAL[buf])
+        if args.event == "TextChanged" then
+          rehighlight_buffer(buf, options, BUFFER_LOCAL[buf])
+        else
+          local pos = vim.fn.getpos "."
+          BUFFER_LOCAL[buf].__startline = pos[2] - 1
+          BUFFER_LOCAL[buf].__endline = pos[2]
+          rehighlight_buffer(buf, options, BUFFER_LOCAL[buf], true)
+        end
       end
     end,
   })

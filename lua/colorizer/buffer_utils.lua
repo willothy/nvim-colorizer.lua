@@ -75,13 +75,8 @@ local function create_highlight(rgb_hex, options)
   return highlight_name
 end
 
-local function add_highlight(options, buf, ns, data)
-  clear_namespace(
-    buf,
-    ns,
-    BUFFER_LINES[buf]["old_min"] or BUFFER_LINES[buf]["min"],
-    BUFFER_LINES[buf]["old_max"] or BUFFER_LINES[buf]["max"]
-  )
+local function add_highlight(options, buf, ns, data, line_start, line_end)
+  clear_namespace(buf, ns, line_start, line_end)
 
   if vim.tbl_contains({ "foreground", "background" }, options.mode) then
     for linenr, hls in pairs(data) do
@@ -110,9 +105,26 @@ local function highlight_buffer_tailwind(buf, ns, mode, options)
     ---@diagnostic disable-next-line: param-type-mismatch
     vim.lsp.buf_request(buf, "textDocument/documentColor", opts, function(err, results, _, _)
       if err == nil and results ~= nil then
-        local datas = {}
+        local datas, line_start, line_end = {}, nil, nil
         for _, color in pairs(results) do
           local cur_line = color.range.start.line
+          if line_start then
+            if cur_line < line_start then
+              line_start = cur_line
+            end
+          else
+            line_start = cur_line
+          end
+
+          local end_line = color.range["end"].line
+          if line_end then
+            if end_line > line_end then
+              line_end = end_line
+            end
+          else
+            line_end = end_line
+          end
+
           local r, g, b, a = color.color.red or 0, color.color.green or 0, color.color.blue or 0, color.color.alpha or 0
           local rgb_hex = string.format("%02x%02x%02x", r * a * 255, g * a * 255, b * a * 255)
           local name = create_highlight(rgb_hex, mode)
@@ -123,7 +135,7 @@ local function highlight_buffer_tailwind(buf, ns, mode, options)
           table.insert(d, { name = name, range = { first_col, end_col } })
           datas[cur_line] = d
         end
-        add_highlight(options, buf, ns, datas)
+        add_highlight(options, buf, ns, datas, line_start, line_end + 2)
       end
     end)
   end, 10)
@@ -139,10 +151,11 @@ local TW_LSP_AU_ID = {}
 ---@param ns number: The namespace id. Default is DEFAULT_NAMESPACE. Create it with `vim.api.create_namespace`
 ---@param lines table: the lines to highlight from the buffer.
 ---@param line_start number: line_start should be 0-indexed
+---@param line_end number: Last line to highlight
 ---@param options table: Configuration options as described in `setup`
 ---@param options_local table: Buffer local variables
 ---@return nil|boolean|number,function|nil
-function highlight_buffer(buf, ns, lines, line_start, options, options_local)
+function highlight_buffer(buf, ns, lines, line_start, line_end, options, options_local)
   if buf == 0 or buf == nil then
     buf = api.nvim_get_current_buf()
   end
@@ -172,7 +185,7 @@ function highlight_buffer(buf, ns, lines, line_start, options, options_local)
       end
     end
   end
-  add_highlight(options, buf, ns, data)
+  add_highlight(options, buf, ns, data, line_start, line_end)
 
   if not options.tailwind or (options.tailwind ~= "lsp" and options.tailwind ~= "both") then
     return
@@ -262,8 +275,6 @@ local function getrow(buf)
   -- store current window position to be used later to incremently highlight
   BUFFER_LINES[buf]["max"] = new_max
   BUFFER_LINES[buf]["min"] = new_min
-  BUFFER_LINES[buf]["old_max"] = max
-  BUFFER_LINES[buf]["old_min"] = min
   return min, max
 end
 
@@ -271,17 +282,24 @@ end
 ---@param buf number: Buffer number
 ---@param options table: Buffer options
 ---@param options_local table|nil: Buffer local variables
+---@param use_local_lines boolean|nil Whether to use lines num range from options_local
 ---@return nil|boolean|number,function|nil
-function rehighlight_buffer(buf, options, options_local)
+function rehighlight_buffer(buf, options, options_local, use_local_lines)
   if buf == 0 or buf == nil then
     buf = api.nvim_get_current_buf()
   end
 
   local ns = DEFAULT_NAMESPACE
 
-  local min, max = getrow(buf)
+  local min, max
+  if use_local_lines and options_local then
+    min, max = options_local.__startline, options_local.__endline
+  else
+    min, max = getrow(buf)
+  end
+
   local lines = buf_get_lines(buf, min, max, false)
-  return highlight_buffer(buf, ns, lines, min, options, options_local or {})
+  return highlight_buffer(buf, ns, lines, min, max, options, options_local or {})
 end
 
 --- @export

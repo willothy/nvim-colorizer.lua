@@ -15,11 +15,11 @@ create_vim_doc() (
 	fi
 
 	if [[ -d "${target}" ]]; then
-		ldoc -p "${project_name}" -t "${project_name} Docs" -u "${target}" -l "${TMP_DIR}" -d "${TMP_DIR}" || cleanup
+		ldoc -p "${project_name}" -t "${project_name} Docs" -u "${target}" -l "${TMP_DIR}" -d "${TMP_DIR}" --date "- $(date +'%B')" || cleanup
 		cd "${TMP_DIR}/modules" || exit 1
 		cat "${project_name}".html "${project_name}"*.*.html >"${project_name}".txt || cleanup
 	elif [[ -f "${target}" ]]; then
-		ldoc -p "${project_name}" -t "${project_name} Docs" -u "${target}" -l "${TMP_DIR}" -d "${TMP_DIR}" || cleanup
+		ldoc -p "${project_name}" -t "${project_name} Docs" -u "${target}" -l "${TMP_DIR}" -d "${TMP_DIR}" --date "- $(date +'%B')" || cleanup
 		cd "${TMP_DIR}" || exit 1
 		cat index.html >"${project_name}".txt || cleanup
 	else
@@ -55,7 +55,7 @@ main() {
 	project_name="colorizer"
 	if command -v ldoc 1>/dev/null; then
 		# html docs
-		ldoc -f discount -p "${project_name}" -t "${project_name} Docs" -u lua "${@}" -s doc || cleanup
+		ldoc -f discount -p "${project_name}" -t "${project_name} Docs" -u lua "${@}" -s doc --date "- $(date +'%B')" || cleanup
 
 		# vim docs
 		create_vim_doc "${project_name}" lua doc/ldoc_vim.ltp || cleanup

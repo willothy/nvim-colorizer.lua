@@ -262,7 +262,8 @@ Fields: ~
 
 
 				       *colorizer.buffer_utils.highlight_buffer*
-highlight_buffer({buf}, {ns}, {lines}, {line_start}, {options}, {options_local})
+highlight_buffer({buf}, {ns}, {lines}, {line_start}, {line_end}, {options},
+{options_local})
     Highlight the buffer region.
 
      Highlight starting from `line_start` (0-indexed) for each line described by
@@ -276,6 +277,7 @@ highlight_buffer({buf}, {ns}, {lines}, {line_start}, {options}, {options_local})
 	it with `vim.api.create_namespace`
 	{lines} -  table: the lines to highlight from the buffer.
 	{line_start} -  number: line_start should be 0-indexed
+	{line_end} -  number: Last line to highlight
 	{options} -  table: Configuration options as described in `setup`
 	{options_local} -  table: Buffer local variables
 
@@ -286,13 +288,15 @@ highlight_buffer({buf}, {ns}, {lines}, {line_start}, {options}, {options_local})
 
 
 				     *colorizer.buffer_utils.rehighlight_buffer*
-rehighlight_buffer({buf}, {options}, {options_local})
+rehighlight_buffer({buf}, {options}, {options_local}, {use_local_lines})
     Rehighlight the buffer if colorizer is active
 
     Parameters: ~
 	{buf} -  number: Buffer number
 	{options} -  table: Buffer options
 	{options_local} -  table|nil: Buffer local variables
+	{use_local_lines} -  boolean|nil Whether to use lines num range from
+	options_local
 
     returns:~
 	nil or boolean or number,function or nil
