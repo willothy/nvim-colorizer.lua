@@ -15,7 +15,7 @@ unsure, [read this excellent guide](https://github.com/termstandard/colors).
 Use your plugin manager or clone directly into your package.
 
 ```lua
-use 'Akianonymus/nvim-colorizer.lua'
+use 'NvChad/nvim-colorizer.lua'
 ```
 
 As long as you have `malloc()` and `free()` on your system, this will work.
