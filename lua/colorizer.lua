@@ -254,8 +254,8 @@ local function attach_to_buffer(buf, options, typ)
 
   BUFFER_LOCAL[buf] = BUFFER_LOCAL[buf] or {}
   local tailwind_ns, tailwind_detach = rehighlight_buffer(buf, options)
-  BUFFER_LOCAL[buf].__tailwind_ns = tailwind_ns
-  BUFFER_LOCAL[buf].__tailwind_detach = tailwind_detach
+  BUFFER_LOCAL[buf].__tailwind_ns = BUFFER_LOCAL[buf].__tailwind_ns or tailwind_ns
+  BUFFER_LOCAL[buf].__tailwind_detach = BUFFER_LOCAL[buf].__tailwind_detach or tailwind_detach
 
   BUFFER_LOCAL[buf].__init = true
 

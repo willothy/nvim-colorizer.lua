@@ -140,7 +140,7 @@ local function highlight_buffer_tailwind(buf, ns, mode, options)
           table.insert(d, { name = name, range = { first_col, end_col } })
           datas[cur_line] = d
         end
-        add_highlight(options, buf, ns, datas, line_start, line_end + 2)
+        add_highlight(options, buf, ns, datas, line_start or 0, line_end and (line_end + 2) or -1)
       end
     end)
   end, 10)
