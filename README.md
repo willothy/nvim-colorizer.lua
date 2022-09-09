@@ -15,7 +15,7 @@ unsure, [read this excellent guide](https://github.com/termstandard/colors).
 Use your plugin manager or clone directly into your package.
 
 ```lua
-use 'Akianonymus/nvim-colorizer.lua'
+use 'NvChad/nvim-colorizer.lua'
 ```
 
 As long as you have `malloc()` and `free()` on your system, this will work.
@@ -96,7 +96,7 @@ library to do custom highlighting themselves.
         mode = "background", -- Set the display mode.
         -- Available methods are false / true / "normal" / "lsp" / "both"
         -- True is same as normal
-        tailwind = false -- Enable tailwind colors
+        tailwind = false, -- Enable tailwind colors
         virtualtext = "■",
       },
       -- all the sub-options of filetypes apply to buftypes
