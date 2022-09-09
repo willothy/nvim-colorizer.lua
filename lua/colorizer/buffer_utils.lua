@@ -30,6 +30,11 @@ local HIGHLIGHT_MODE_NAMES = {
 }
 local HIGHLIGHT_CACHE = {}
 
+--- Clean the highlight cache
+local function clear_hl_cache()
+  HIGHLIGHT_CACHE = {}
+end
+
 --- Make a deterministic name for a highlight given these attributes
 local function make_highlight_name(rgb, mode)
   return table.concat({ HIGHLIGHT_NAME_PREFIX, HIGHLIGHT_MODE_NAMES[mode], rgb }, "_")
@@ -333,6 +338,7 @@ end
 return {
   DEFAULT_NAMESPACE = DEFAULT_NAMESPACE,
   HIGHLIGHT_MODE_NAMES = HIGHLIGHT_MODE_NAMES,
+  clear_hl_cache = clear_hl_cache,
   rehighlight_buffer = rehighlight_buffer,
   highlight_buffer = highlight_buffer,
 }

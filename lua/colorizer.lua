@@ -65,6 +65,7 @@ local buffer_utils = require "colorizer.buffer_utils"
 local DEFAULT_NAMESPACE = buffer_utils.DEFAULT_NAMESPACE
 
 local HIGHLIGHT_MODE_NAMES = buffer_utils.HIGHLIGHT_MODE_NAMES
+local clear_hl_cache = buffer_utils.clear_hl_cache
 local rehighlight_buffer = buffer_utils.rehighlight_buffer
 
 ---Highlight the buffer region
@@ -166,7 +167,12 @@ end
 local function is_buffer_attached(buf)
   if buf == 0 or buf == nil then
     buf = current_buf()
+  else
+    if not api.nvim_buf_is_valid(buf) then
+      return
+    end
   end
+
   local au = api.nvim_get_autocmds {
     group = AUGROUP_ID,
     event = { "WinScrolled", "TextChanged", "TextChangedI", "TextChangedP" },
@@ -214,6 +220,10 @@ end
 local function attach_to_buffer(buf, options, typ)
   if buf == 0 or buf == nil then
     buf = current_buf()
+  else
+    if not api.nvim_buf_is_valid(buf) then
+      return
+    end
   end
 
   if not options then
@@ -448,7 +458,7 @@ end
 
 --- Clear the highlight cache and reload all buffers.
 local function clear_highlight_cache()
-  HIGHLIGHT_CACHE = {}
+  clear_hl_cache()
   vim.schedule(reload_all_buffers)
 end
 

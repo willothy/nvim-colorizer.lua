@@ -247,6 +247,8 @@ Helper functions to highlight buffer smartly
 LUA API                                         *colorizer.buffer_utils-lua-api*
 
 Functions: ~
+    |clear_hl_cache| - Clean the highlight cache
+
     |highlight_buffer| - Highlight the buffer region.
 
     |rehighlight_buffer| - Rehighlight the buffer if colorizer is active
@@ -258,6 +260,11 @@ Tables: ~
 Fields: ~
     |DEFAULT_NAMESPACE| - Default namespace used in `highlight_buffer` and
     `colorizer.attach_to_buffer`.
+
+
+clear_hl_cache()                         *colorizer.buffer_utils.clear_hl_cache*
+    Clean the highlight cache
+
 
 
 
