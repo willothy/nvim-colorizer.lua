@@ -96,7 +96,7 @@ library to do custom highlighting themselves.
         mode = "background", -- Set the display mode.
         -- Available methods are false / true / "normal" / "lsp" / "both"
         -- True is same as normal
-        tailwind = false -- Enable tailwind colors
+        tailwind = false, -- Enable tailwind colors
         virtualtext = "■",
       },
       -- all the sub-options of filetypes apply to buftypes
