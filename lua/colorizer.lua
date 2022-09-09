@@ -68,6 +68,7 @@ local HIGHLIGHT_MODE_NAMES = buffer_utils.HIGHLIGHT_MODE_NAMES
 local clear_hl_cache = buffer_utils.clear_hl_cache
 local rehighlight_buffer = buffer_utils.rehighlight_buffer
 
+local get_buffer_options
 ---Highlight the buffer region
 ---@function highlight_buffer
 -- @see colorizer.buffer_utils.highlight_buffer
@@ -169,6 +170,7 @@ local function is_buffer_attached(buf)
     buf = current_buf()
   else
     if not api.nvim_buf_is_valid(buf) then
+      BUFFER_LOCAL[buf], BUFFER_OPTIONS[buf] = nil, nil
       return
     end
   end
@@ -215,17 +217,24 @@ end
 
 ---Attach to a buffer and continuously highlight changes.
 ---@param buf integer: A value of 0 implies the current buffer.
----@param options table: Configuration options as described in `setup`
+---@param options table|nil: Configuration options as described in `setup`
 ---@param typ string|nil: "buf" or "file" - The type of buffer option
 local function attach_to_buffer(buf, options, typ)
   if buf == 0 or buf == nil then
     buf = current_buf()
   else
     if not api.nvim_buf_is_valid(buf) then
+      BUFFER_LOCAL[buf], BUFFER_OPTIONS[buf] = nil, nil
       return
     end
   end
 
+  -- if the buffer is already attached then grab those options
+  if not options then
+    options = get_buffer_options(buf)
+  end
+
+  -- if not make new options
   if not options then
     options = new_buffer_options(buf, typ)
   end
@@ -442,11 +451,12 @@ end
 
 --- Return the currently active buffer options.
 ---@param buf number|nil: Buffer number
-local function get_buffer_options(buf)
-  if buf == 0 or buf == nil then
-    buf = current_buf()
+---@return table|nil
+function get_buffer_options(buf)
+  local buffer = is_buffer_attached(buf)
+  if buffer then
+    return BUFFER_OPTIONS[buffer]
   end
-  return merge({}, BUFFER_OPTIONS[buf])
 end
 
 --- Reload all of the currently active highlighted buffers.

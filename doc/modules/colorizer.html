@@ -262,7 +262,7 @@ USE WITH LUA
          integer: A value of 0 implies the current buffer.
         </li>
         <li><span class="parameter">options</span>
-         table: Configuration options as described in <a href="../modules/colorizer.html#setup">setup</a>
+         table|nil: Configuration options as described in <a href="../modules/colorizer.html#setup">setup</a>
         </li>
         <li><span class="parameter">typ</span>
          string|nil: "buf" or "file" - The type of buffer option
@@ -335,6 +335,11 @@ Setup an autocmd which enables colorizing for the filetypes and options specifie
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+
+        table|nil
+    </ol>
 
 
 

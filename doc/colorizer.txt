@@ -130,7 +130,7 @@ attach_to_buffer({buf}, {options}, {typ})           *colorizer.attach_to_buffer*
 
     Parameters: ~
 	{buf} -  integer: A value of 0 implies the current buffer.
-	{options} -  table: Configuration options as described in `setup`
+	{options} -  table|nil: Configuration options as described in `setup`
 	{typ} -  string|nil: "buf" or "file" - The type of buffer option
 
 
@@ -173,6 +173,9 @@ get_buffer_options({buf})                         *colorizer.get_buffer_options*
 
     Parameters: ~
 	{buf} -  number|nil: Buffer number
+
+    returns:~
+	table or nil
 
 
 
