@@ -1,6 +1,6 @@
 # colorizer.lua
 
-[![luadoc](https://img.shields.io/badge/luadoc-0.1-blue)](https://akianonymus.github.io/nvim-colorizer.lua)
+[![luadoc](https://img.shields.io/badge/luadoc-0.1-blue)](https://nvchad.com/nvim-colorizer.lua/)
 
 A high-performance color highlighter for Neovim which has **no external dependencies**! Written in performant Luajit.
 
@@ -69,7 +69,7 @@ Apart from that, it only applies the highlights to the current visible contents,
 even if a big file is opened, the editor won't just choke on a blank screen.
 
 This idea was copied from
- [brenoprata10/nvim-highlight-colors](https://github.com/brenoprata10/nvim-highlight-colors.)
+ [brenoprata10/nvim-highlight-colors](https://github.com/brenoprata10/nvim-highlight-colors)
 Credits to [brenoprata10](https://github.com/brenoprata10)
 
 Additionally, having a Lua API that's available means users can use this as a
@@ -176,12 +176,12 @@ require 'colorizer'.setup(
 )
 ```
 
-For lower level interface, see the [LuaDocs for API details](https://akianonymus.github.io/luadoc/nvim-colorizer.lua/modules/colorizer.html) or use `:h colorizer` once installed.
+For lower level interface, see the [LuaDocs for API details](https://nvchad.com/nvim-colorizer.lua/modules/colorizer.html) or use `:h colorizer` once installed.
 
 ## Extras
 
 Documentaion is generated using ldoc. See
-[scripts/gen_docs.sh](https://github.com/Akianonymus/nvim-colorizer.lua/blob/master/scripts/gen_docs.sh)
+[scripts/gen_docs.sh](https://github.com/NvChad/nvim-colorizer.lua/blob/master/scripts/gen_docs.sh)
 
 ## TODO
 
