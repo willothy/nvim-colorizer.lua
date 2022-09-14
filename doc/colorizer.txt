@@ -577,6 +577,45 @@ sass_update_variables({buf}, {line_start}, {line_end}, {lines}, {color_parser},
 
 
 ==============================================================================
+TAILWIND                                       *colorizer.tailwind-introduction*
+
+Helper functions to parse tailwind color variables
+
+
+==============================================================================
+LUA API                                             *colorizer.tailwind-lua-api*
+
+Functions: ~
+    |tailwind_cleanup| - Cleanup tailwind variables and autocmd
+
+    |tailwind_setup_lsp_colors| - highlight buffer using values returned by
+    tailwindcss
+ To see these table information, see |colorizer.buffer_utils|
+
+
+tailwind_cleanup({buf})                    *colorizer.tailwind.tailwind_cleanup*
+    Cleanup tailwind variables and autocmd
+
+    Parameters: ~
+	{buf} -  number
+
+
+
+
+				  *colorizer.tailwind.tailwind_setup_lsp_colors*
+tailwind_setup_lsp_colors({buf}, {options}, {options_local}, {add_highlight})
+    highlight buffer using values returned by tailwindcss
+     To see these table information, see |colorizer.buffer_utils|
+
+    Parameters: ~
+	{buf} -  number
+	{options} -  table
+	{options_local} -  table
+	{add_highlight} -  function
+
+
+
+==============================================================================
 TRIE                                               *colorizer.trie-introduction*
 
 Trie implementation in luajit.

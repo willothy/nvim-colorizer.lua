@@ -41,9 +41,9 @@
   <li><a href="../modules/colorizer.html">colorizer</a></li>
   <li><a href="../modules/colorizer.buffer_utils.html">buffer_utils</a></li>
   <li><a href="../modules/colorizer.color_utils.html">color_utils</a></li>
-  <li><strong>matcher_utils</strong></li>
+  <li><a href="../modules/colorizer.matcher_utils.html">matcher_utils</a></li>
   <li><a href="../modules/colorizer.sass.html">sass</a></li>
-  <li><a href="../modules/colorizer.tailwind.html">tailwind</a></li>
+  <li><strong>tailwind</strong></li>
   <li><a href="../modules/colorizer.trie.html">trie</a></li>
   <li><a href="../modules/utils.html">utils</a></li>
 </ul>
@@ -52,8 +52,8 @@
 
 <div id="content">
 
-<h1>Module <code>colorizer.matcher_utils</code></h1>
-<p>Helper functions for colorizer to enable required parsers</p>
+<h1>Module <code>colorizer.tailwind</code></h1>
+<p>Helper functions to parse tailwind color variables</p>
 <p>
 
 </p>
@@ -62,8 +62,13 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#make_matcher">make_matcher (options)</a></td>
-	<td class="summary">Parse the given options and return a function with enabled parsers.</td>
+	<td class="name" nowrap><a href="#tailwind_cleanup">tailwind_cleanup (buf)</a></td>
+	<td class="summary">Cleanup tailwind variables and autocmd</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tailwind_setup_lsp_colors">tailwind_setup_lsp_colors (buf, options, options_local, add_highlight)</a></td>
+	<td class="summary">highlight buffer using values returned by tailwindcss
+ To see these table information, see |colorizer.buffer_utils|</td>
 	</tr>
 </table>
 
@@ -75,27 +80,50 @@
 
     <dl class="function">
     <dt>
-    <a name = "make_matcher"></a>
-    <strong>make_matcher (options)</strong>
+    <a name = "tailwind_cleanup"></a>
+    <strong>tailwind_cleanup (buf)</strong>
     </dt>
     <dd>
-    Parse the given options and return a function with enabled parsers.
-if no parsers enabled then return false
-Do not try make the function again if it is present in the cache
+    Cleanup tailwind variables and autocmd
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">options</span>
-         table: options created in <a href="../modules/colorizer.html#setup">colorizer.setup</a>
+        <li><span class="parameter">buf</span>
+         number
         </li>
     </ul>
 
-    <h3>Returns:</h3>
-    <ol>
 
-        function|boolean: function which will just parse the line for enabled parsers
-    </ol>
+
+
+
+</dd>
+    <dt>
+    <a name = "tailwind_setup_lsp_colors"></a>
+    <strong>tailwind_setup_lsp_colors (buf, options, options_local, add_highlight)</strong>
+    </dt>
+    <dd>
+    highlight buffer using values returned by tailwindcss
+ To see these table information, see |colorizer.buffer_utils|
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">buf</span>
+         number
+        </li>
+        <li><span class="parameter">options</span>
+         table
+        </li>
+        <li><span class="parameter">options_local</span>
+         table
+        </li>
+        <li><span class="parameter">add_highlight</span>
+         function
+        </li>
+    </ul>
+
 
 
 

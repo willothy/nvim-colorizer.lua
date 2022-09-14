@@ -14,6 +14,10 @@ local sass = require "colorizer.sass"
 local sass_update_variables = sass.sass_update_variables
 local sass_cleanup = sass.sass_cleanup
 
+local tailwind = require "colorizer.tailwind"
+local tailwind_setup_lsp = tailwind.tailwind_setup_lsp_colors
+local tailwind_cleanup = tailwind.tailwind_cleanup
+
 local make_matcher = require("colorizer.matcher_utils").make_matcher
 
 local highlight_buffer, rehighlight_buffer
@@ -22,8 +26,6 @@ local BUFFER_LINES = {}
 -- @see highlight_buffer
 -- @see colorizer.attach_to_buffer
 local DEFAULT_NAMESPACE = create_namespace "colorizer"
--- use a different namespace for tailwind as will be cleared if kept in Default namespace
-local DEFAULT_NAMESPACE_TAILWIND = create_namespace "colorizer_tailwind"
 local HIGHLIGHT_NAME_PREFIX = "colorizer"
 --- Highlight mode which will be use to render the colour
 local HIGHLIGHT_MODE_NAMES = {
@@ -32,6 +34,33 @@ local HIGHLIGHT_MODE_NAMES = {
   virtualtext = "mv",
 }
 local HIGHLIGHT_CACHE = {}
+
+local function parse_lines(buf, lines, line_start, options)
+  local loop_parse_fn = make_matcher(options)
+  if not loop_parse_fn then
+    return false
+  end
+
+  local data = {}
+  for current_linenum, line in ipairs(lines) do
+    current_linenum = current_linenum - 1 + line_start
+    data[current_linenum] = data[current_linenum] or {}
+
+    -- Upvalues are options and current_linenum
+    local i = 1
+    while i < #line do
+      local length, rgb_hex = loop_parse_fn(line, i, buf)
+      if length and rgb_hex then
+        table.insert(data[current_linenum], { rgb_hex = rgb_hex, range = { i - 1, i + length - 1 } })
+        i = i + length
+      else
+        i = i + 1
+      end
+    end
+  end
+
+  return data
+end
 
 --- Clean the highlight cache
 local function clear_hl_cache()
@@ -107,52 +136,6 @@ local function add_highlight(options, buf, ns, data, line_start, line_end)
   end
 end
 
-local function highlight_buffer_tailwind(buf, ns, options)
-  -- it can take some time to actually fetch the results
-  -- on top of that, tailwindcss is quite slow in neovim
-  vim.defer_fn(function()
-    local opts = { textDocument = vim.lsp.util.make_text_document_params() }
-    --@local
-    ---@diagnostic disable-next-line: param-type-mismatch
-    vim.lsp.buf_request(buf, "textDocument/documentColor", opts, function(err, results, _, _)
-      if err == nil and results ~= nil then
-        local datas, line_start, line_end = {}, nil, nil
-        for _, color in pairs(results) do
-          local cur_line = color.range.start.line
-          if line_start then
-            if cur_line < line_start then
-              line_start = cur_line
-            end
-          else
-            line_start = cur_line
-          end
-
-          local end_line = color.range["end"].line
-          if line_end then
-            if end_line > line_end then
-              line_end = end_line
-            end
-          else
-            line_end = end_line
-          end
-
-          local r, g, b, a = color.color.red or 0, color.color.green or 0, color.color.blue or 0, color.color.alpha or 0
-          local rgb_hex = string.format("%02x%02x%02x", r * a * 255, g * a * 255, b * a * 255)
-          local first_col = color.range.start.character
-          local end_col = color.range["end"].character
-
-          datas[cur_line] = datas[cur_line] or {}
-          table.insert(datas[cur_line], { rgb_hex = rgb_hex, range = { first_col, end_col } })
-        end
-        add_highlight(options, buf, ns, datas, line_start or 0, line_end and (line_end + 2) or -1)
-      end
-    end)
-  end, 10)
-end
-
-local TW_LSP_AU_CREATED = {}
-local TW_LSP_AU_ID = {}
-local TW_LSP_CLIENT = {}
 --- Highlight the buffer region.
 -- Highlight starting from `line_start` (0-indexed) for each line described by `lines` in the
 -- buffer `buf` and attach it to the namespace `ns`.
@@ -171,10 +154,6 @@ function highlight_buffer(buf, ns, lines, line_start, line_end, options, options
   end
 
   ns = ns or DEFAULT_NAMESPACE
-  local loop_parse_fn = make_matcher(options)
-  if not loop_parse_fn then
-    return false, returns
-  end
 
   -- only update sass varibled when text is changed
   if options_local.__event ~= "WinScrolled" and options.sass and options.sass.enable then
@@ -182,106 +161,12 @@ function highlight_buffer(buf, ns, lines, line_start, line_end, options, options
     sass_update_variables(buf, 0, -1, nil, make_matcher(options.sass.parsers or { css = true }), options, options_local)
   end
 
-  local data = {}
-  for current_linenum, line in ipairs(lines) do
-    current_linenum = current_linenum - 1 + line_start
-    data[current_linenum] = data[current_linenum] or {}
-
-    -- Upvalues are options and current_linenum
-    local i = 1
-    while i < #line do
-      local length, rgb_hex = loop_parse_fn(line, i, buf)
-      if length and rgb_hex then
-        table.insert(data[current_linenum], { rgb_hex = rgb_hex, range = { i - 1, i + length - 1 } })
-        i = i + length
-      else
-        i = i + 1
-      end
-    end
-  end
+  local data = parse_lines(buf, lines, line_start, options)
   add_highlight(options, buf, ns, data, line_start, line_end)
 
-  if not options.tailwind or (options.tailwind ~= "lsp" and options.tailwind ~= "both") then
-    return true, returns
-  end
-
-  if not TW_LSP_CLIENT[buf] or TW_LSP_CLIENT[buf].is_stopped() then
-    local function del_tailwind_stuff()
-      TW_LSP_CLIENT[buf] = nil
-    end
-    if vim.version().minor >= 8 then
-      -- create the autocmds so tailwind colours only activate when tailwindcss lsp is active
-      function del_tailwind_stuff()
-        pcall(api.nvim_del_autocmd, TW_LSP_AU_ID[buf][1])
-        pcall(api.nvim_del_autocmd, TW_LSP_AU_ID[buf][2])
-        TW_LSP_AU_CREATED[buf], TW_LSP_AU_ID[buf], TW_LSP_CLIENT[buf] = nil, nil, nil
-      end
-
-      if not TW_LSP_AU_CREATED[buf] then
-        TW_LSP_AU_ID[buf], TW_LSP_AU_CREATED[buf], TW_LSP_CLIENT[buf] = {}, nil, nil
-        TW_LSP_AU_ID[buf][1] = api.nvim_create_autocmd("LspAttach", {
-          group = options_local.__augroup_id,
-          buffer = buf,
-          callback = function(args)
-            local ok, client = pcall(vim.lsp.get_client_by_id, args.data.client_id)
-            if ok then
-              if client.name == "tailwindcss" and client.supports_method "textDocument/documentColor" then
-                -- wait 100 ms for the first request
-                TW_LSP_CLIENT[buf] = client
-                vim.defer_fn(function()
-                  highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, options)
-                end, 100)
-              end
-            end
-          end,
-        })
-        -- make sure the autocmds are deleted after lsp server is closed
-        TW_LSP_AU_ID[buf][2] = api.nvim_create_autocmd("LspDetach", {
-          group = options_local.__augroup_id,
-          buffer = buf,
-          callback = function()
-            del_tailwind_stuff()
-            clear_namespace(buf, DEFAULT_NAMESPACE_TAILWIND, 0, -1)
-          end,
-        })
-        TW_LSP_AU_CREATED[buf] = true
-      end
-    end
-
-    TW_LSP_CLIENT[buf] = nil
-
-    local ok, tailwind_client = pcall(function()
-      return vim.lsp.get_active_clients { bufnr = buf, name = "tailwindcss" }
-    end)
-    tailwind_client = ok and tailwind_client or {}
-    if vim.tbl_isempty(tailwind_client) then
-      table.insert(returns.detach.functions, del_tailwind_stuff)
-      table.insert(returns.detach.ns, DEFAULT_NAMESPACE_TAILWIND)
-      return true, returns
-    end
-
-    if not tailwind_client[1] or not tailwind_client[1].supports_method "textDocument/documentColor" then
-      table.insert(returns.detach.functions, del_tailwind_stuff)
-      table.insert(returns.detach.ns, DEFAULT_NAMESPACE_TAILWIND)
-      return true, returns
-    end
-
-    TW_LSP_CLIENT[buf] = tailwind_client[1]
-
-    -- wait 100 ms for the first request
-    vim.defer_fn(function()
-      highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, options)
-    end, 100)
-
-    table.insert(returns.detach.functions, del_tailwind_stuff)
-    table.insert(returns.detach.ns, DEFAULT_NAMESPACE_TAILWIND)
-
-    return true, returns
-  end
-
-  -- only try to do tailwindcss highlight if lsp is attached
-  if TW_LSP_CLIENT[buf] then
-    highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, options)
+  if options.tailwind == "lsp" or options.tailwind == "both" then
+    tailwind_setup_lsp(buf, options, options_local, add_highlight)
+    table.insert(returns.detach.functions, tailwind_cleanup)
   end
 
   return true, returns
