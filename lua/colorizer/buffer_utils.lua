@@ -43,8 +43,8 @@ local function make_highlight_name(rgb, mode)
   return table.concat({ HIGHLIGHT_NAME_PREFIX, HIGHLIGHT_MODE_NAMES[mode], rgb }, "_")
 end
 
-local function create_highlight(rgb_hex, options)
-  local mode = options.mode or "background"
+local function create_highlight(rgb_hex, mode)
+  mode = mode or "background"
   -- TODO validate rgb format?
   rgb_hex = rgb_hex:lower()
   local cache_key = table.concat({ HIGHLIGHT_MODE_NAMES[mode], rgb_hex }, "_")
@@ -86,25 +86,28 @@ end
 local function add_highlight(options, buf, ns, data, line_start, line_end)
   clear_namespace(buf, ns, line_start, line_end)
 
+  local mode = options.mode == "background" and "background" or "foreground"
   if vim.tbl_contains({ "foreground", "background" }, options.mode) then
     for linenr, hls in pairs(data) do
       for _, hl in ipairs(hls) do
-        api.nvim_buf_add_highlight(buf, ns, hl.name, linenr, hl.range[1], hl.range[2])
+        local hlname = create_highlight(hl.rgb_hex, mode)
+        api.nvim_buf_add_highlight(buf, ns, hlname, linenr, hl.range[1], hl.range[2])
       end
     end
   elseif options.mode == "virtualtext" then
     for linenr, hls in pairs(data) do
       for _, hl in ipairs(hls) do
+        local hlname = create_highlight(hl.rgb_hex, mode)
         buf_set_virtual_text(0, ns, linenr, hl.range[2], {
           end_col = hl.range[2],
-          virt_text = { { options.virtualtext or "■", hl.name } },
+          virt_text = { { options.virtualtext or "■", hlname } },
         })
       end
     end
   end
 end
 
-local function highlight_buffer_tailwind(buf, ns, mode, options)
+local function highlight_buffer_tailwind(buf, ns, options)
   -- it can take some time to actually fetch the results
   -- on top of that, tailwindcss is quite slow in neovim
   vim.defer_fn(function()
@@ -135,12 +138,11 @@ local function highlight_buffer_tailwind(buf, ns, mode, options)
 
           local r, g, b, a = color.color.red or 0, color.color.green or 0, color.color.blue or 0, color.color.alpha or 0
           local rgb_hex = string.format("%02x%02x%02x", r * a * 255, g * a * 255, b * a * 255)
-          local name = create_highlight(rgb_hex, mode)
           local first_col = color.range.start.character
           local end_col = color.range["end"].character
 
           datas[cur_line] = datas[cur_line] or {}
-          table.insert(datas[cur_line], { name = name, range = { first_col, end_col } })
+          table.insert(datas[cur_line], { rgb_hex = rgb_hex, range = { first_col, end_col } })
         end
         add_highlight(options, buf, ns, datas, line_start or 0, line_end and (line_end + 2) or -1)
       end
@@ -181,7 +183,6 @@ function highlight_buffer(buf, ns, lines, line_start, line_end, options, options
   end
 
   local data = {}
-  local mode = options.mode == "background" and { mode = "background" } or { mode = "foreground" }
   for current_linenum, line in ipairs(lines) do
     current_linenum = current_linenum - 1 + line_start
     data[current_linenum] = data[current_linenum] or {}
@@ -191,8 +192,7 @@ function highlight_buffer(buf, ns, lines, line_start, line_end, options, options
     while i < #line do
       local length, rgb_hex = loop_parse_fn(line, i, buf)
       if length and rgb_hex then
-        local name = create_highlight(rgb_hex, mode)
-        table.insert(data[current_linenum], { name = name, range = { i - 1, i + length - 1 } })
+        table.insert(data[current_linenum], { rgb_hex = rgb_hex, range = { i - 1, i + length - 1 } })
         i = i + length
       else
         i = i + 1
@@ -229,7 +229,7 @@ function highlight_buffer(buf, ns, lines, line_start, line_end, options, options
                 -- wait 100 ms for the first request
                 TW_LSP_CLIENT[buf] = client
                 vim.defer_fn(function()
-                  highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, mode, options)
+                  highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, options)
                 end, 100)
               end
             end
@@ -270,7 +270,7 @@ function highlight_buffer(buf, ns, lines, line_start, line_end, options, options
 
     -- wait 100 ms for the first request
     vim.defer_fn(function()
-      highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, mode, options)
+      highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, options)
     end, 100)
 
     table.insert(returns.detach.functions, del_tailwind_stuff)
@@ -281,7 +281,7 @@ function highlight_buffer(buf, ns, lines, line_start, line_end, options, options
 
   -- only try to do tailwindcss highlight if lsp is attached
   if TW_LSP_CLIENT[buf] then
-    highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, mode, options)
+    highlight_buffer_tailwind(buf, DEFAULT_NAMESPACE_TAILWIND, options)
   end
 
   return true, returns
