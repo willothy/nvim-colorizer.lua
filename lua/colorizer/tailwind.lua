@@ -12,8 +12,10 @@ local TAILWIND = {}
 --- Cleanup tailwind variables and autocmd
 ---@param buf number
 function tailwind.cleanup(buf)
-  pcall(api.nvim_del_autocmd, TAILWIND[buf] and TAILWIND[buf].AU_ID[1])
-  pcall(api.nvim_del_autocmd, TAILWIND[buf] and TAILWIND[buf].AU_ID[2])
+  if TAILWIND[buf] and TAILWIND[buf].AU_ID and TAILWIND[buf].AU_ID[1] then
+    pcall(api.nvim_del_autocmd, TAILWIND[buf].AU_ID[1])
+    pcall(api.nvim_del_autocmd, TAILWIND[buf].AU_ID[2])
+  end
   api.nvim_buf_clear_namespace(buf, DEFAULT_NAMESPACE_TAILWIND, 0, -1)
   TAILWIND[buf] = nil
 end
@@ -79,7 +81,7 @@ function tailwind.setup_lsp_colors(buf, options, options_local, add_highlight)
     if vim.version().minor >= 8 then
       -- create the autocmds so tailwind colours only activate when tailwindcss lsp is active
       if not TAILWIND[buf].AU_CREATED then
-        tailwind.cleanup(buf)
+        api.nvim_buf_clear_namespace(buf, DEFAULT_NAMESPACE_TAILWIND, 0, -1)
         TAILWIND[buf].AU_ID[1] = api.nvim_create_autocmd("LspAttach", {
           group = options_local.__augroup_id,
           buffer = buf,
