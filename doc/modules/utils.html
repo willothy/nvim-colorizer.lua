@@ -39,9 +39,9 @@
 <h2>Modules</h2>
 <ul class="nowrap">
   <li><a href="../modules/colorizer.html">colorizer</a></li>
-  <li><a href="../modules/colorizer.buffer_utils.html">buffer_utils</a></li>
-  <li><a href="../modules/colorizer.color_utils.html">color_utils</a></li>
-  <li><a href="../modules/colorizer.matcher_utils.html">matcher_utils</a></li>
+  <li><a href="../modules/colorizer.buffer.html">buffer</a></li>
+  <li><a href="../modules/colorizer.color.html">color</a></li>
+  <li><a href="../modules/colorizer.matcher.html">matcher</a></li>
   <li><a href="../modules/colorizer.sass.html">sass</a></li>
   <li><a href="../modules/colorizer.tailwind.html">tailwind</a></li>
   <li><a href="../modules/colorizer.trie.html">trie</a></li>
@@ -70,6 +70,10 @@
 	<td class="summary">Obvious.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#get_last_modified">get_last_modified (path)</a></td>
+	<td class="summary">Get last modified time of a file</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#merge">merge (...)</a></td>
 	<td class="summary">Merge two tables.</td>
 	</tr>
@@ -80,10 +84,6 @@
 	<tr>
 	<td class="name" nowrap><a href="#percent_or_hex">percent_or_hex (v)</a></td>
 	<td class="summary">Obvious.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#get_last_modified">get_last_modified (path)</a></td>
-	<td class="summary">Get last modified time of a file</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#watch_file">watch_file (path, callback, ...)</a></td>
@@ -142,6 +142,31 @@
     <ol>
 
         boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_last_modified"></a>
+    <strong>get_last_modified (path)</strong>
+    </dt>
+    <dd>
+    Get last modified time of a file
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         string: file path
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        number|nil: modified time
     </ol>
 
 
@@ -221,31 +246,6 @@
     <ol>
 
         number|nil
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "get_last_modified"></a>
-    <strong>get_last_modified (path)</strong>
-    </dt>
-    <dd>
-    Get last modified time of a file
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">path</span>
-         string: file path
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        number|nil: modified time
     </ol>
 
 

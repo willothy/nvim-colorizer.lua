@@ -1,41 +1,45 @@
 ---Helper functions for colorizer to enable required parsers
---@module colorizer.matcher_utils
+--@module colorizer.matcher
 local Trie = require "colorizer.trie"
 local min, max = math.min, math.max
 
-local color_utils = require "colorizer.color_utils"
-local color_name_parser = color_utils.color_name_parser
-local rgba_hex_parser = color_utils.rgba_hex_parser
+local color = require "colorizer.color"
+local color_name_parser = color.name_parser
+local rgba_hex_parser = color.rgba_hex_parser
 
 local sass = require "colorizer.sass"
-local sass_name_parser = sass.sass_name_parser
+local sass_name_parser = sass.name_parser
 
-local parser = {}
-parser["_0x"] = color_utils.argb_hex_parser
-parser["_rgb"] = color_utils.rgb_function_parser
-parser["_rgba"] = color_utils.rgba_function_parser
-parser["_hsl"] = color_utils.hsl_function_parser
-parser["_hsla"] = color_utils.hsla_function_parser
-local b_hash, dollar_hash = ("#"):byte(), ("$"):byte()
+local B_HASH, DOLLAR_HASH = ("#"):byte(), ("$"):byte()
+
+local parser = {
+  ["_0x"] = color.argb_hex_parser,
+  ["_rgb"] = color.rgb_function_parser,
+  ["_rgba"] = color.rgba_function_parser,
+  ["_hsl"] = color.hsl_function_parser,
+  ["_hsla"] = color.hsla_function_parser,
+}
+
+local matcher = {}
 
 ---Form a trie stuct with the given prefixes
 ---@param matchers table: List of prefixes, {"rgb", "hsl"}
 ---@param matchers_trie table: Table containing information regarding non-trie based parsers
 ---@return function: function which will just parse the line for enabled parsers
-local function compile_matcher(matchers, matchers_trie)
+function matcher.compile(matchers, matchers_trie)
   local trie = Trie(matchers_trie)
 
   local function parse_fn(line, i, buf)
     -- prefix #
     if matchers.rgba_hex_parser then
-      if line:byte(i) == b_hash then
+      if line:byte(i) == B_HASH then
         return rgba_hex_parser(line, i, matchers.rgba_hex_parser)
       end
     end
 
     -- prefix $, SASS Colour names
     if matchers.sass_name_parser then
-      if line:byte(i) == dollar_hash then
+      if line:byte(i) == DOLLAR_HASH then
         return sass_name_parser(line, i, buf)
       end
     end
@@ -63,7 +67,7 @@ local MATCHER_CACHE = {}
 --Do not try make the function again if it is present in the cache
 ---@param options table: options created in `colorizer.setup`
 ---@return function|boolean: function which will just parse the line for enabled parsers
-local function make_matcher(options)
+function matcher.make(options)
   local enable_names = options.css or options.names
   local enable_sass = options.sass and options.sass.enable
   local enable_tailwind = options.tailwind
@@ -128,7 +132,6 @@ local function make_matcher(options)
     table.insert(matchers_prefix, "0x")
   end
 
-  -- do not mess with the sequence, hsla before hsl, etc
   if enable_rgb and enable_hsl then
     table.insert(matchers_prefix, "hsla")
     table.insert(matchers_prefix, "rgba")
@@ -142,13 +145,10 @@ local function make_matcher(options)
     table.insert(matchers_prefix, "hsl")
   end
 
-  loop_parse_fn = compile_matcher(matchers, matchers_prefix)
+  loop_parse_fn = matcher.compile(matchers, matchers_prefix)
   MATCHER_CACHE[matcher_key] = loop_parse_fn
 
   return loop_parse_fn
 end
 
---- @export
-return {
-  make_matcher = make_matcher,
-}
+return matcher

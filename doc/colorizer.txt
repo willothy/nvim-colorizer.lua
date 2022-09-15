@@ -89,15 +89,15 @@ Tables: ~
     |user_default_options| - defaults options.
 
 Fields: ~
-    |DEFAULT_NAMESPACE| - Default namespace used in
-    `colorizer.buffer_utils.highlight_buffer` and `attach_to_buffer`.
+    |DEFAULT_NAMESPACE| - Default namespace used in `colorizer.buffer.highlight`
+    and `attach_to_buffer`.
 
 
 highlight_buffer()                                  *colorizer.highlight_buffer*
     Highlight the buffer region
 
     See also:~
-	|colorizer.buffer_utils.highlight_buffer|
+	|colorizer.buffer.highlight|
 
 
 
@@ -111,7 +111,7 @@ is_buffer_attached({buf})                         *colorizer.is_buffer_attached*
 	number or nil: if attached to the buffer, false otherwise.
 
     See also:~
-	|highlight_buffer|
+	|colorizer.buffer.highlight|
 
 
 
@@ -234,49 +234,69 @@ user_default_options                            *colorizer.user_default_options*
 
 
 DEFAULT_NAMESPACE                                  *colorizer.DEFAULT_NAMESPACE*
-    Default namespace used in `colorizer.buffer_utils.highlight_buffer` and
+    Default namespace used in `colorizer.buffer.highlight` and
     `attach_to_buffer`.
 
     See also:~
-	|colorizer.buffer_utils.highlight_buffer|
+	|colorizer.buffer.highlight|
 	|attach_to_buffer|
 
 
 
 ==============================================================================
-BUFFER_UTILS                               *colorizer.buffer_utils-introduction*
+BUFFER                                           *colorizer.buffer-introduction*
 
 Helper functions to highlight buffer smartly
 
 
 ==============================================================================
-LUA API                                         *colorizer.buffer_utils-lua-api*
+LUA API                                               *colorizer.buffer-lua-api*
 
 Functions: ~
     |clear_hl_cache| - Clean the highlight cache
 
-    |highlight_buffer| - Highlight the buffer region.
+    |add_highlight| - Create highlight and set highlights
 
-    |rehighlight_buffer| - Rehighlight the buffer if colorizer is active
+    |highlight| - Highlight the buffer region.
+
+    |parse_lines| - Parse the given lines for colors and return a table
+    containing
+ rgb_hex and range per line
+
+    |rehighlight| - Rehighlight the buffer if colorizer is active
 
 Tables: ~
-    |HIGHLIGHT_MODE_NAMES| - Highlight mode which will be use to render the
+    |highlight_mode_names| - Highlight mode which will be use to render the
     colour
 
 Fields: ~
-    |DEFAULT_NAMESPACE| - Default namespace used in `highlight_buffer` and
+    |default_namespace| - Default namespace used in `highlight` and
     `colorizer.attach_to_buffer`.
 
 
-clear_hl_cache()                         *colorizer.buffer_utils.clear_hl_cache*
+clear_hl_cache()                               *colorizer.buffer.clear_hl_cache*
     Clean the highlight cache
 
 
 
 
-				       *colorizer.buffer_utils.highlight_buffer*
-highlight_buffer({buf}, {ns}, {lines}, {line_start}, {line_end}, {options},
-{options_local})
+						*colorizer.buffer.add_highlight*
+add_highlight({buf}, {ns}, {line_start}, {line_end}, {data}, {options})
+    Create highlight and set highlights
+
+    Parameters: ~
+	{buf} -  number
+	{ns} -  number
+	{line_start} -  number
+	{line_end} -  number
+	{data} -  table: table output of `parse_lines`
+	{options} -  table: Passed in setup, mainly for `user_default_options`
+
+
+
+
+						    *colorizer.buffer.highlight*
+highlight({buf}, {ns}, {line_start}, {line_end}, {options}, {options_local})
     Highlight the buffer region.
 
      Highlight starting from `line_start` (0-indexed) for each line described by
@@ -287,8 +307,7 @@ highlight_buffer({buf}, {ns}, {lines}, {line_start}, {line_end}, {options},
     Parameters: ~
 	{buf} -  number: buffer id
 	{ns} -  number: The namespace id. Default is DEFAULT_NAMESPACE. Create
-	it with `vim.api.create_namespace`
-	{lines} -  table: the lines to highlight from the buffer.
+	it with `vim.api.nvim_create_namespace`
 	{line_start} -  number: line_start should be 0-indexed
 	{line_end} -  number: Last line to highlight
 	{options} -  table: Configuration options as described in `setup`
@@ -300,8 +319,27 @@ highlight_buffer({buf}, {ns}, {lines}, {line_start}, {line_end}, {options},
 
 
 
-				     *colorizer.buffer_utils.rehighlight_buffer*
-rehighlight_buffer({buf}, {options}, {options_local}, {use_local_lines})
+						  *colorizer.buffer.parse_lines*
+parse_lines({buf}, {lines}, {line_start}, {options})
+    Parse the given lines for colors and return a table containing
+     rgb_hex and range per line
+
+    Parameters: ~
+	{buf} -  number
+	{lines} -  table
+	{line_start} -  number: This is the buffer line number, from where to
+	start highlighting
+	{options} -  table: Passed in `colorizer.setup`, Only uses
+	`user_default_options`
+
+    returns:~
+	table or nil
+
+
+
+
+						  *colorizer.buffer.rehighlight*
+rehighlight({buf}, {options}, {options_local}, {use_local_lines})
     Rehighlight the buffer if colorizer is active
 
     Parameters: ~
@@ -316,7 +354,7 @@ rehighlight_buffer({buf}, {options}, {options_local}, {use_local_lines})
 
 
 
-HIGHLIGHT_MODE_NAMES               *colorizer.buffer_utils.HIGHLIGHT_MODE_NAMES*
+highlight_mode_names                     *colorizer.buffer.highlight_mode_names*
     Highlight mode which will be use to render the colour
 
     Fields: ~
@@ -326,45 +364,119 @@ HIGHLIGHT_MODE_NAMES               *colorizer.buffer_utils.HIGHLIGHT_MODE_NAMES*
 
 
 
-DEFAULT_NAMESPACE                     *colorizer.buffer_utils.DEFAULT_NAMESPACE*
-    Default namespace used in `highlight_buffer` and
-    `colorizer.attach_to_buffer`.
+default_namespace                           *colorizer.buffer.default_namespace*
+    Default namespace used in `highlight` and `colorizer.attach_to_buffer`.
 
     See also:~
-	|highlight_buffer|
+	|highlight|
 	|colorizer.attach_to_buffer|
 
 
 
 ==============================================================================
-COLOR_UTILS                                 *colorizer.color_utils-introduction*
+COLOR                                             *colorizer.color-introduction*
 
 Helper functions to parse different colour formats
 
 
 ==============================================================================
-LUA API                                          *colorizer.color_utils-lua-api*
+LUA API                                                *colorizer.color-lua-api*
 
 Functions: ~
-    |color_is_bright| - Determine whether to use black or white text.
+    |argb_hex_parser| - parse for 0xaarrggbb and return rgb hex.
 
-    |color_name_parser| - Grab all the colour values from
-    `vim.api.nvim_get_color_map` and create a lookup table.
-
-    |rgb_function_parser| - Parse for rgb() css function and return rgb hex.
-
-    |rgba_function_parser| - Parse for rgba() css function and return rgb hex.
+    |hsl_to_rgb| - Converts an HSL color value to RGB.
 
     |hsl_function_parser| - Parse for hsl() css function and return rgb hex.
 
     |hsla_function_parser| - Parse for hsl() css function and return rgb hex.
 
-    |argb_hex_parser| - parse for 0xaarrggbb and return rgb hex.
+    |hue_to_rgb| - Convert hsl colour values to rgb.
+
+    |is_bright| - Determine whether to use black or white text.
+
+    |name_parser| - Grab all the colour values from `vim.api.nvim_get_color_map`
+    and create a lookup table.
+
+    |rgb_function_parser| - Parse for rgb() css function and return rgb hex.
+
+    |rgba_function_parser| - Parse for rgba() css function and return rgb hex.
 
     |rgba_hex_parser| - parse for #rrggbbaa and return rgb hex.
 
 
-color_is_bright({r}, {g}, {b})           *colorizer.color_utils.color_is_bright*
+argb_hex_parser({line}, {i})                   *colorizer.color.argb_hex_parser*
+    parse for 0xaarrggbb and return rgb hex.
+
+     a format used in android apps
+
+
+    Parameters: ~
+	{line} -  string: line to parse
+	{i} -  number: index of line from where to start parsing
+
+    returns:~
+	number or nil: index of line where the hex value ended
+	string or nil: rgb hex value
+
+
+
+hsl_to_rgb({h}, {s}, {l})                           *colorizer.color.hsl_to_rgb*
+    Converts an HSL color value to RGB.
+
+    Parameters: ~
+	{h} -  number: Hue
+	{s} -  number: Saturation
+	{l} -  number: Lightness
+
+    returns:~
+	number or nil,number or nil,number or nil
+
+
+
+hsl_function_parser({line}, {i})           *colorizer.color.hsl_function_parser*
+    Parse for hsl() css function and return rgb hex.
+
+    Parameters: ~
+	{line} -  string: Line to parse
+	{i} -  number: Index of line from where to start parsing
+
+    returns:~
+	number or nil: Index of line where the hsl function ended
+	string or nil: rgb hex value
+
+
+
+hsla_function_parser({line}, {i})         *colorizer.color.hsla_function_parser*
+    Parse for hsl() css function and return rgb hex.
+
+    Parameters: ~
+	{line} -  string: Line to parse
+	{i} -  number: Index of line from where to start parsing
+
+    returns:~
+	number or nil: Index of line where the hsla function ended
+	string or nil: rgb hex value
+
+
+
+hue_to_rgb({p}, {q}, {t})                           *colorizer.color.hue_to_rgb*
+    Convert hsl colour values to rgb.
+
+     Source: https://gist.github.com/mjackson/5311256
+
+
+    Parameters: ~
+	{p} -  number
+	{q} -  number
+	{t} -  number
+
+    returns:~
+	number
+
+
+
+is_bright({r}, {g}, {b})                             *colorizer.color.is_bright*
     Determine whether to use black or white text.
 
 
@@ -379,7 +491,7 @@ color_is_bright({r}, {g}, {b})           *colorizer.color_utils.color_is_bright*
 
 
 
-color_name_parser({line}, {i}, {opts}) *colorizer.color_utils.color_name_parser*
+name_parser({line}, {i}, {opts})                   *colorizer.color.name_parser*
     Grab all the colour values from `vim.api.nvim_get_color_map` and create a
     lookup table.
 
@@ -393,7 +505,7 @@ color_name_parser({line}, {i}, {opts}) *colorizer.color_utils.color_name_parser*
 
 
 
-rgb_function_parser({line}, {i})     *colorizer.color_utils.rgb_function_parser*
+rgb_function_parser({line}, {i})           *colorizer.color.rgb_function_parser*
     Parse for rgb() css function and return rgb hex.
 
     Parameters: ~
@@ -406,7 +518,7 @@ rgb_function_parser({line}, {i})     *colorizer.color_utils.rgb_function_parser*
 
 
 
-rgba_function_parser({line}, {i})   *colorizer.color_utils.rgba_function_parser*
+rgba_function_parser({line}, {i})         *colorizer.color.rgba_function_parser*
     Parse for rgba() css function and return rgb hex.
 
      Todo consider removing the regexes here
@@ -424,49 +536,7 @@ rgba_function_parser({line}, {i})   *colorizer.color_utils.rgba_function_parser*
 
 
 
-hsl_function_parser({line}, {i})     *colorizer.color_utils.hsl_function_parser*
-    Parse for hsl() css function and return rgb hex.
-
-    Parameters: ~
-	{line} -  string: Line to parse
-	{i} -  number: Index of line from where to start parsing
-
-    returns:~
-	number or nil: Index of line where the hsl function ended
-	string or nil: rgb hex value
-
-
-
-hsla_function_parser({line}, {i})   *colorizer.color_utils.hsla_function_parser*
-    Parse for hsl() css function and return rgb hex.
-
-    Parameters: ~
-	{line} -  string: Line to parse
-	{i} -  number: Index of line from where to start parsing
-
-    returns:~
-	number or nil: Index of line where the hsla function ended
-	string or nil: rgb hex value
-
-
-
-argb_hex_parser({line}, {i})             *colorizer.color_utils.argb_hex_parser*
-    parse for 0xaarrggbb and return rgb hex.
-
-     a format used in android apps
-
-
-    Parameters: ~
-	{line} -  string: line to parse
-	{i} -  number: index of line from where to start parsing
-
-    returns:~
-	number or nil: index of line where the hex value ended
-	string or nil: rgb hex value
-
-
-
-rgba_hex_parser({line}, {i}, {opts})     *colorizer.color_utils.rgba_hex_parser*
+rgba_hex_parser({line}, {i}, {opts})           *colorizer.color.rgba_hex_parser*
     parse for #rrggbbaa and return rgb hex.
 
      a format used in android apps
@@ -484,20 +554,34 @@ rgba_hex_parser({line}, {i}, {opts})     *colorizer.color_utils.rgba_hex_parser*
 
 
 ==============================================================================
-MATCHER_UTILS                             *colorizer.matcher_utils-introduction*
+MATCHER                                         *colorizer.matcher-introduction*
 
 Helper functions for colorizer to enable required parsers
 
 
 ==============================================================================
-LUA API                                        *colorizer.matcher_utils-lua-api*
+LUA API                                              *colorizer.matcher-lua-api*
 
 Functions: ~
-    |make_matcher| - Parse the given options and return a function with enabled
-    parsers.
+    |compile| - Form a trie stuct with the given prefixes
+
+    |make| - Parse the given options and return a function with enabled parsers.
 
 
-make_matcher({options})                   *colorizer.matcher_utils.make_matcher*
+compile({matchers}, {matchers_trie})                 *colorizer.matcher.compile*
+    Form a trie stuct with the given prefixes
+
+    Parameters: ~
+	{matchers} -  table: List of prefixes, {"rgb", "hsl"}
+	{matchers_trie} -  table: Table containing information regarding
+	non-trie based parsers
+
+    returns:~
+	function: function which will just parse the line for enabled parsers
+
+
+
+make({options})                                         *colorizer.matcher.make*
     Parse the given options and return a function with enabled parsers.
 
     if no parsers enabled then return false
@@ -523,16 +607,16 @@ Helper functions to parse sass color variables
 LUA API                                                 *colorizer.sass-lua-api*
 
 Functions: ~
-    |sass_cleanup| - Cleanup sass variables and watch handlers
+    |cleanup| - Cleanup sass variables and watch handlers
 
-    |sass_name_parser| - Parse the given line for sass color names
+    |name_parser| - Parse the given line for sass color names
  check for value in SASS[buf].DEFINITIONS_ALL
 
-    |sass_update_variables| - Parse the given lines for sass variabled and add
-    to SASS[buf].DEFINITIONS_ALL.
+    |update_variables| - Parse the given lines for sass variabled and add to
+    `SASS[buf].DEFINITIONS_ALL`.
 
 
-sass_cleanup({buf})                                *colorizer.sass.sass_cleanup*
+cleanup({buf})                                          *colorizer.sass.cleanup*
     Cleanup sass variables and watch handlers
 
     Parameters: ~
@@ -540,7 +624,7 @@ sass_cleanup({buf})                                *colorizer.sass.sass_cleanup*
 
 
 
-sass_name_parser({line}, {i}, {buf})           *colorizer.sass.sass_name_parser*
+name_parser({line}, {i}, {buf})                     *colorizer.sass.name_parser*
     Parse the given line for sass color names
      check for value in SASS[buf].DEFINITIONS_ALL
 
@@ -555,11 +639,11 @@ sass_name_parser({line}, {i}, {buf})           *colorizer.sass.sass_name_parser*
 
 
 
-					  *colorizer.sass.sass_update_variables*
-sass_update_variables({buf}, {line_start}, {line_end}, {lines}, {color_parser},
+					       *colorizer.sass.update_variables*
+update_variables({buf}, {line_start}, {line_end}, {lines}, {color_parser},
 {options}, {options_local})
     Parse the given lines for sass variabled and add to
-    SASS[buf].DEFINITIONS_ALL.
+    `SASS[buf].DEFINITIONS_ALL`.
 
      which is then used in |sass_name_parser|
      If lines are not given, then fetch the lines with line_start and line_end
@@ -586,14 +670,13 @@ Helper functions to parse tailwind color variables
 LUA API                                             *colorizer.tailwind-lua-api*
 
 Functions: ~
-    |tailwind_cleanup| - Cleanup tailwind variables and autocmd
+    |cleanup| - Cleanup tailwind variables and autocmd
 
-    |tailwind_setup_lsp_colors| - highlight buffer using values returned by
-    tailwindcss
- To see these table information, see |colorizer.buffer_utils|
+    |setup_lsp_colors| - highlight buffer using values returned by tailwindcss
+ To see these table information, see |colorizer.buffer|
 
 
-tailwind_cleanup({buf})                    *colorizer.tailwind.tailwind_cleanup*
+cleanup({buf})                                      *colorizer.tailwind.cleanup*
     Cleanup tailwind variables and autocmd
 
     Parameters: ~
@@ -602,10 +685,10 @@ tailwind_cleanup({buf})                    *colorizer.tailwind.tailwind_cleanup*
 
 
 
-				  *colorizer.tailwind.tailwind_setup_lsp_colors*
-tailwind_setup_lsp_colors({buf}, {options}, {options_local}, {add_highlight})
+					   *colorizer.tailwind.setup_lsp_colors*
+setup_lsp_colors({buf}, {options}, {options_local}, {add_highlight})
     highlight buffer using values returned by tailwindcss
-     To see these table information, see |colorizer.buffer_utils|
+     To see these table information, see |colorizer.buffer|
 
     Parameters: ~
 	{buf} -  number

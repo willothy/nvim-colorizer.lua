@@ -7,6 +7,8 @@ local utils = require "colorizer.utils"
 local get_last_modified = utils.get_last_modified
 local watch_file = utils.watch_file
 
+local sass = {}
+
 local DOLLAR_HASH = ("$"):byte()
 local AT_HASH = ("@"):byte()
 local COLON_HASH = (";"):byte()
@@ -29,7 +31,7 @@ end
 
 --- Cleanup sass variables and watch handlers
 ---@param buf number
-local function sass_cleanup(buf)
+function sass.cleanup(buf)
   remove_unused_imports(buf, api.nvim_buf_get_name(buf))
   SASS[buf] = nil
 end
@@ -40,8 +42,8 @@ end
 ---@param i number: Index of line from where to start parsing
 ---@param buf number
 ---@return number|nil, string|nil
-local function sass_name_parser(line, i, buf)
-  local variable_name = line:sub(i):match "^%$([%w_-]+)"
+function sass.name_parser(line, i, buf)
+  local variable_name = line:match("^%$([%w_-]+)", i)
   if variable_name then
     local rgb_hex = SASS[buf].DEFINITIONS_ALL[variable_name]
     if rgb_hex then
@@ -194,6 +196,7 @@ local function sass_parse_lines(buf, line_start, content, name)
 
                   local lastm = get_last_modified(v)
                   if lastm then
+                    SASS[buf].IMPORTS[name] = SASS[buf].IMPORTS[name] or {}
                     SASS[buf].IMPORTS[name][v] = lastm
                     local cc, inde = {}, 0
                     for l in io.lines(v) do
@@ -204,12 +207,7 @@ local function sass_parse_lines(buf, line_start, content, name)
                     cc = nil
                   end
 
-                  require("colorizer.buffer_utils").rehighlight_buffer(
-                    buf,
-                    SASS[buf].OPTIONS,
-                    SASS[buf].LOCAL_OPTIONS,
-                    true
-                  )
+                  require("colorizer.buffer").rehighlight(buf, SASS[buf].OPTIONS, SASS[buf].LOCAL_OPTIONS, true)
                 end
                 SASS[buf].WATCH_IMPORTS[name][v] = watch_file(v, watch_callback)
               end
@@ -234,7 +232,7 @@ local function sass_parse_lines(buf, line_start, content, name)
   end
 end -- sass_parse_lines end
 
---- Parse the given lines for sass variabled and add to SASS[buf].DEFINITIONS_ALL.
+--- Parse the given lines for sass variabled and add to `SASS[buf].DEFINITIONS_ALL`.
 -- which is then used in |sass_name_parser|
 -- If lines are not given, then fetch the lines with line_start and line_end
 ---@param buf number
@@ -244,7 +242,7 @@ end -- sass_parse_lines end
 ---@param color_parser function|boolean
 ---@param options table: Buffer options
 ---@param options_local table|nil: Buffer local variables
-local function sass_update_variables(buf, line_start, line_end, lines, color_parser, options, options_local)
+function sass.update_variables(buf, line_start, line_end, lines, color_parser, options, options_local)
   lines = lines or vim.api.nvim_buf_get_lines(buf, line_start, line_end, false)
 
   if not SASS[buf] then
@@ -308,9 +306,4 @@ local function sass_update_variables(buf, line_start, line_end, lines, color_par
   SASS[buf].DEFINITIONS_RECURSIVE_CURRENT_ABSOLUTE = nil
 end
 
---- @export
-return {
-  sass_cleanup = sass_cleanup,
-  sass_name_parser = sass_name_parser,
-  sass_update_variables = sass_update_variables,
-}
+return sass

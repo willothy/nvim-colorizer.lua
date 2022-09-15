@@ -39,9 +39,9 @@
 <h2>Modules</h2>
 <ul class="nowrap">
   <li><a href="../modules/colorizer.html">colorizer</a></li>
-  <li><a href="../modules/colorizer.buffer_utils.html">buffer_utils</a></li>
-  <li><a href="../modules/colorizer.color_utils.html">color_utils</a></li>
-  <li><a href="../modules/colorizer.matcher_utils.html">matcher_utils</a></li>
+  <li><a href="../modules/colorizer.buffer.html">buffer</a></li>
+  <li><a href="../modules/colorizer.color.html">color</a></li>
+  <li><a href="../modules/colorizer.matcher.html">matcher</a></li>
   <li><strong>sass</strong></li>
   <li><a href="../modules/colorizer.tailwind.html">tailwind</a></li>
   <li><a href="../modules/colorizer.trie.html">trie</a></li>
@@ -62,17 +62,17 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#sass_cleanup">sass_cleanup (buf)</a></td>
+	<td class="name" nowrap><a href="#cleanup">cleanup (buf)</a></td>
 	<td class="summary">Cleanup sass variables and watch handlers</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#sass_name_parser">sass_name_parser (line, i, buf)</a></td>
+	<td class="name" nowrap><a href="#name_parser">name_parser (line, i, buf)</a></td>
 	<td class="summary">Parse the given line for sass color names
  check for value in SASS[buf].DEFINITIONS_ALL</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#sass_update_variables">sass_update_variables (buf, line_start, line_end, lines, color_parser, options, options_local)</a></td>
-	<td class="summary">Parse the given lines for sass variabled and add to SASS[buf].DEFINITIONS_ALL.</td>
+	<td class="name" nowrap><a href="#update_variables">update_variables (buf, line_start, line_end, lines, color_parser, options, options_local)</a></td>
+	<td class="summary">Parse the given lines for sass variabled and add to <code>SASS[buf].DEFINITIONS_ALL</code>.</td>
 	</tr>
 </table>
 
@@ -84,8 +84,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "sass_cleanup"></a>
-    <strong>sass_cleanup (buf)</strong>
+    <a name = "cleanup"></a>
+    <strong>cleanup (buf)</strong>
     </dt>
     <dd>
     Cleanup sass variables and watch handlers
@@ -104,8 +104,8 @@
 
 </dd>
     <dt>
-    <a name = "sass_name_parser"></a>
-    <strong>sass_name_parser (line, i, buf)</strong>
+    <a name = "name_parser"></a>
+    <strong>name_parser (line, i, buf)</strong>
     </dt>
     <dd>
     Parse the given line for sass color names
@@ -136,13 +136,13 @@
 
 </dd>
     <dt>
-    <a name = "sass_update_variables"></a>
-    <strong>sass_update_variables (buf, line_start, line_end, lines, color_parser, options, options_local)</strong>
+    <a name = "update_variables"></a>
+    <strong>update_variables (buf, line_start, line_end, lines, color_parser, options, options_local)</strong>
     </dt>
     <dd>
-    Parse the given lines for sass variabled and add to SASS[buf].DEFINITIONS<em>ALL.
- which is then used in |sass</em>name<em>parser|
- If lines are not given, then fetch the lines with line</em>start and line_end
+    Parse the given lines for sass variabled and add to <code>SASS[buf].DEFINITIONS_ALL</code>.
+ which is then used in |sass<em>name</em>parser|
+ If lines are not given, then fetch the lines with line<em>start and line</em>end
 
 
     <h3>Parameters:</h3>

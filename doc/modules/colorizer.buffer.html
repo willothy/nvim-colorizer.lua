@@ -41,9 +41,9 @@
 <h2>Modules</h2>
 <ul class="nowrap">
   <li><a href="../modules/colorizer.html">colorizer</a></li>
-  <li><strong>buffer_utils</strong></li>
-  <li><a href="../modules/colorizer.color_utils.html">color_utils</a></li>
-  <li><a href="../modules/colorizer.matcher_utils.html">matcher_utils</a></li>
+  <li><strong>buffer</strong></li>
+  <li><a href="../modules/colorizer.color.html">color</a></li>
+  <li><a href="../modules/colorizer.matcher.html">matcher</a></li>
   <li><a href="../modules/colorizer.sass.html">sass</a></li>
   <li><a href="../modules/colorizer.tailwind.html">tailwind</a></li>
   <li><a href="../modules/colorizer.trie.html">trie</a></li>
@@ -54,7 +54,7 @@
 
 <div id="content">
 
-<h1>Module <code>colorizer.buffer_utils</code></h1>
+<h1>Module <code>colorizer.buffer</code></h1>
 <p>Helper functions to highlight buffer smartly</p>
 <p>
 
@@ -68,26 +68,35 @@
 	<td class="summary">Clean the highlight cache</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#highlight_buffer">highlight_buffer (buf, ns, lines, line_start, line_end, options, options_local)</a></td>
+	<td class="name" nowrap><a href="#add_highlight">add_highlight (buf, ns, line_start, line_end, data, options)</a></td>
+	<td class="summary">Create highlight and set highlights</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#highlight">highlight (buf, ns, line_start, line_end, options, options_local)</a></td>
 	<td class="summary">Highlight the buffer region.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#rehighlight_buffer">rehighlight_buffer (buf, options, options_local, use_local_lines)</a></td>
+	<td class="name" nowrap><a href="#parse_lines">parse_lines (buf, lines, line_start, options)</a></td>
+	<td class="summary">Parse the given lines for colors and return a table containing
+ rgb_hex and range per line</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rehighlight">rehighlight (buf, options, options_local, use_local_lines)</a></td>
 	<td class="summary">Rehighlight the buffer if colorizer is active</td>
 	</tr>
 </table>
 <h2><a href="#Tables">Tables</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#HIGHLIGHT_MODE_NAMES">HIGHLIGHT_MODE_NAMES</a></td>
+	<td class="name" nowrap><a href="#highlight_mode_names">highlight_mode_names</a></td>
 	<td class="summary">Highlight mode which will be use to render the colour</td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#DEFAULT_NAMESPACE">DEFAULT_NAMESPACE</a></td>
-	<td class="summary">Default namespace used in <a href="../modules/colorizer.buffer_utils.html#highlight_buffer">highlight_buffer</a> and <a href="../modules/colorizer.html#attach_to_buffer">colorizer.attach_to_buffer</a>.</td>
+	<td class="name" nowrap><a href="#default_namespace">default_namespace</a></td>
+	<td class="summary">Default namespace used in <a href="../modules/colorizer.buffer.html#highlight">highlight</a> and <a href="../modules/colorizer.html#attach_to_buffer">colorizer.attach_to_buffer</a>.</td>
 	</tr>
 </table>
 
@@ -113,8 +122,43 @@
 
 </dd>
     <dt>
-    <a name = "highlight_buffer"></a>
-    <strong>highlight_buffer (buf, ns, lines, line_start, line_end, options, options_local)</strong>
+    <a name = "add_highlight"></a>
+    <strong>add_highlight (buf, ns, line_start, line_end, data, options)</strong>
+    </dt>
+    <dd>
+    Create highlight and set highlights
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">buf</span>
+         number
+        </li>
+        <li><span class="parameter">ns</span>
+         number
+        </li>
+        <li><span class="parameter">line_start</span>
+         number
+        </li>
+        <li><span class="parameter">line_end</span>
+         number
+        </li>
+        <li><span class="parameter">data</span>
+         table: table output of <a href="../modules/colorizer.buffer.html#parse_lines">parse_lines</a>
+        </li>
+        <li><span class="parameter">options</span>
+         table: Passed in setup, mainly for <code>user_default_options</code>
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "highlight"></a>
+    <strong>highlight (buf, ns, line_start, line_end, options, options_local)</strong>
     </dt>
     <dd>
     Highlight the buffer region.
@@ -128,10 +172,7 @@
          number: buffer id
         </li>
         <li><span class="parameter">ns</span>
-         number: The namespace id. Default is DEFAULT_NAMESPACE. Create it with <code>vim.api.create_namespace</code>
-        </li>
-        <li><span class="parameter">lines</span>
-         table: the lines to highlight from the buffer.
+         number: The namespace id. Default is DEFAULT_NAMESPACE. Create it with <code>vim.api.nvim_create_namespace</code>
         </li>
         <li><span class="parameter">line_start</span>
          number: line_start should be 0-indexed
@@ -158,8 +199,43 @@
 
 </dd>
     <dt>
-    <a name = "rehighlight_buffer"></a>
-    <strong>rehighlight_buffer (buf, options, options_local, use_local_lines)</strong>
+    <a name = "parse_lines"></a>
+    <strong>parse_lines (buf, lines, line_start, options)</strong>
+    </dt>
+    <dd>
+    Parse the given lines for colors and return a table containing
+ rgb_hex and range per line
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">buf</span>
+         number
+        </li>
+        <li><span class="parameter">lines</span>
+         table
+        </li>
+        <li><span class="parameter">line_start</span>
+         number: This is the buffer line number, from where to start highlighting
+        </li>
+        <li><span class="parameter">options</span>
+         table: Passed in <a href="../modules/colorizer.html#setup">colorizer.setup</a>, Only uses <code>user_default_options</code>
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table|nil
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rehighlight"></a>
+    <strong>rehighlight (buf, options, options_local, use_local_lines)</strong>
     </dt>
     <dd>
     Rehighlight the buffer if colorizer is active
@@ -196,8 +272,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "HIGHLIGHT_MODE_NAMES"></a>
-    <strong>HIGHLIGHT_MODE_NAMES</strong>
+    <a name = "highlight_mode_names"></a>
+    <strong>highlight_mode_names</strong>
     </dt>
     <dd>
     Highlight mode which will be use to render the colour
@@ -232,11 +308,11 @@
 
     <dl class="function">
     <dt>
-    <a name = "DEFAULT_NAMESPACE"></a>
-    <strong>DEFAULT_NAMESPACE</strong>
+    <a name = "default_namespace"></a>
+    <strong>default_namespace</strong>
     </dt>
     <dd>
-    Default namespace used in <a href="../modules/colorizer.buffer_utils.html#highlight_buffer">highlight_buffer</a> and <a href="../modules/colorizer.html#attach_to_buffer">colorizer.attach_to_buffer</a>.
+    Default namespace used in <a href="../modules/colorizer.buffer.html#highlight">highlight</a> and <a href="../modules/colorizer.html#attach_to_buffer">colorizer.attach_to_buffer</a>.
 
 
 
@@ -244,7 +320,7 @@
 
     <h3>See also:</h3>
     <ul>
-         <li><a href="../modules/colorizer.buffer_utils.html#highlight_buffer">highlight_buffer</a></li>
+         <li><a href="../modules/colorizer.buffer.html#highlight">highlight</a></li>
          <li><a href="../modules/colorizer.html#attach_to_buffer">colorizer.attach_to_buffer</a></li>
     </ul>
 

@@ -57,22 +57,9 @@
 -- @see colorizer.attach_to_buffer
 -- @see colorizer.detach_from_buffer
 
-local buffer_utils = require "colorizer.buffer_utils"
-
----Default namespace used in `colorizer.buffer_utils.highlight_buffer` and `attach_to_buffer`.
--- @see colorizer.buffer_utils.highlight_buffer
--- @see attach_to_buffer
-local DEFAULT_NAMESPACE = buffer_utils.DEFAULT_NAMESPACE
-
-local HIGHLIGHT_MODE_NAMES = buffer_utils.HIGHLIGHT_MODE_NAMES
+local buffer_utils = require "colorizer.buffer"
 local clear_hl_cache = buffer_utils.clear_hl_cache
-local rehighlight_buffer = buffer_utils.rehighlight_buffer
-
-local get_buffer_options
----Highlight the buffer region
----@function highlight_buffer
--- @see colorizer.buffer_utils.highlight_buffer
-local highlight_buffer = buffer_utils.highlight_buffer
+local rehighlight_buffer = buffer_utils.rehighlight
 
 local utils = require "colorizer.utils"
 local merge = utils.merge
@@ -83,6 +70,18 @@ local autocmd = api.nvim_create_autocmd
 local buf_get_option = api.nvim_buf_get_option
 local clear_namespace = api.nvim_buf_clear_namespace
 local current_buf = api.nvim_get_current_buf
+
+local colorizer = {}
+
+---Default namespace used in `colorizer.buffer.highlight` and `attach_to_buffer`.
+-- @see colorizer.buffer.highlight
+-- @see attach_to_buffer
+colorizer.DEFAULT_NAMESPACE = buffer_utils.default_namespace
+
+---Highlight the buffer region
+---@function highlight_buffer
+-- @see colorizer.buffer.highlight
+colorizer.highlight_buffer = buffer_utils.highlight
 
 -- USER FACING FUNCTIONALITY --
 local AUGROUP_ID
@@ -168,8 +167,8 @@ end
 --- Check if attached to a buffer.
 ---@param buf number|nil: A value of 0 implies the current buffer.
 ---@return number|nil: if attached to the buffer, false otherwise.
----@see highlight_buffer
-local function is_buffer_attached(buf)
+---@see colorizer.buffer.highlight
+function colorizer.is_buffer_attached(buf)
   if buf == 0 or buf == nil then
     buf = current_buf()
   else
@@ -194,13 +193,13 @@ end
 --- Stop highlighting the current buffer.
 ---@param buf number|nil: buf A value of 0 or nil implies the current buffer.
 ---@param ns number|nil: ns the namespace id, if not given DEFAULT_NAMESPACE is used
-local function detach_from_buffer(buf, ns)
-  buf = is_buffer_attached(buf)
+function colorizer.detach_from_buffer(buf, ns)
+  buf = colorizer.is_buffer_attached(buf)
   if not buf then
     return
   end
 
-  clear_namespace(buf, ns or DEFAULT_NAMESPACE, 0, -1)
+  clear_namespace(buf, ns or colorizer.DEFAULT_NAMESPACE, 0, -1)
   if BUFFER_LOCAL[buf] then
     for _, namespace in pairs(BUFFER_LOCAL[buf].__detach.ns) do
       clear_namespace(buf, namespace, 0, -1)
@@ -227,7 +226,7 @@ end
 ---@param buf integer: A value of 0 implies the current buffer.
 ---@param options table|nil: Configuration options as described in `setup`
 ---@param typ string|nil: "buf" or "file" - The type of buffer option
-local function attach_to_buffer(buf, options, typ)
+function colorizer.attach_to_buffer(buf, options, typ)
   if buf == 0 or buf == nil then
     buf = current_buf()
   else
@@ -239,7 +238,7 @@ local function attach_to_buffer(buf, options, typ)
 
   -- if the buffer is already attached then grab those options
   if not options then
-    options = get_buffer_options(buf)
+    options = colorizer.get_buffer_options(buf)
   end
 
   -- if not make new options
@@ -247,7 +246,7 @@ local function attach_to_buffer(buf, options, typ)
     options = new_buffer_options(buf, typ)
   end
 
-  if not HIGHLIGHT_MODE_NAMES[options.mode] then
+  if not buffer_utils.highlight_mode_names[options.mode] then
     if options.mode ~= nil then
       local mode = options.mode
       vim.defer_fn(function()
@@ -320,7 +319,7 @@ local function attach_to_buffer(buf, options, typ)
     buffer = buf,
     callback = function()
       if BUFFER_OPTIONS[buf] then
-        detach_from_buffer(buf)
+        colorizer.detach_from_buffer(buf)
       end
       BUFFER_LOCAL[buf].__init = nil
     end,
@@ -351,7 +350,7 @@ end
 --For all user_default_options, see |user_default_options|
 ---@param config table: Config containing above parameters.
 ---@usage `require'colorizer'.setup()`
-local function setup(config)
+function colorizer.setup(config)
   if not vim.opt.termguicolors then
     vim.schedule(function()
       vim.notify("Colorizer: Error: &termguicolors must be set", "Error")
@@ -383,7 +382,7 @@ local function setup(config)
       -- when a filetype is disabled but buftype is enabled, it can Attach in
       -- some cases, so manually detach
       if BUFFER_OPTIONS[buf] then
-        detach_from_buffer(buf)
+        colorizer.detach_from_buffer(buf)
       end
       BUFFER_LOCAL[buf].__init = nil
       return
@@ -409,7 +408,7 @@ local function setup(config)
     -- but BufWinEnter also triggers for split formation
     -- but we don't want that so add a check using local buffer variable
     if not BUFFER_LOCAL[buf].__init then
-      attach_to_buffer(buf, options, typ)
+      colorizer.attach_to_buffer(buf, options, typ)
     end
   end
 
@@ -472,35 +471,24 @@ end
 --- Return the currently active buffer options.
 ---@param buf number|nil: Buffer number
 ---@return table|nil
-function get_buffer_options(buf)
-  local buffer = is_buffer_attached(buf)
+function colorizer.get_buffer_options(buf)
+  local buffer = colorizer.is_buffer_attached(buf)
   if buffer then
     return BUFFER_OPTIONS[buffer]
   end
 end
 
 --- Reload all of the currently active highlighted buffers.
-local function reload_all_buffers()
+function colorizer.reload_all_buffers()
   for buf, _ in pairs(BUFFER_OPTIONS) do
-    attach_to_buffer(buf, get_buffer_options(buf))
+    colorizer.attach_to_buffer(buf, colorizer.get_buffer_options(buf))
   end
 end
 
 --- Clear the highlight cache and reload all buffers.
-local function clear_highlight_cache()
+function colorizer.clear_highlight_cache()
   clear_hl_cache()
-  vim.schedule(reload_all_buffers)
+  vim.schedule(colorizer.reload_all_buffers)
 end
 
---- @export
-return {
-  DEFAULT_NAMESPACE = DEFAULT_NAMESPACE,
-  setup = setup,
-  is_buffer_attached = is_buffer_attached,
-  attach_to_buffer = attach_to_buffer,
-  detach_from_buffer = detach_from_buffer,
-  highlight_buffer = highlight_buffer,
-  reload_all_buffers = reload_all_buffers,
-  get_buffer_options = get_buffer_options,
-  clear_highlight_cache = clear_highlight_cache,
-}
+return colorizer
