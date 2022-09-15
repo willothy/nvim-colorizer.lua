@@ -8,7 +8,7 @@ A high-performance color highlighter for Neovim which has **no external dependen
 
 ## Installation and Usage
 
-Requires Neovim >= 0.6.0 and `set termguicolors`.
+Requires Neovim >= 0.7.0 and `set termguicolors`.
 If you don't have true color for your terminal or are
 unsure, [read this excellent guide](https://github.com/termstandard/colors).
 

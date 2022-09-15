@@ -1,4 +1,4 @@
---- Requires Neovim >= 0.6.0 and `set termguicolors`
+--- Requires Neovim >= 0.7.0 and `set termguicolors`
 --
 --Highlights terminal CSI ANSI color codes.
 -- @module colorizer
