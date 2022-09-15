@@ -147,12 +147,10 @@ local function sass_parse_lines(buf, line_start, content, name)
               parent_dir = (parent_dir ~= "") and parent_dir .. "/" or ""
               folder_path = vim.fn.fnamemodify(parent_dir .. folder_path, ":p")
               file_name = file_name
-              files = {
-                folder_path .. file_name .. ".scss",
-                folder_path .. "_" .. file_name .. ".scss",
-                folder_path .. file_name .. ".sass",
-                folder_path .. "_" .. file_name .. ".sass",
-              }
+              table.insert(files, folder_path .. file_name .. ".scss")
+              table.insert(files, folder_path .. "_" .. file_name .. ".scss")
+              table.insert(files, folder_path .. file_name .. ".sass")
+              table.insert(files, folder_path .. "_" .. file_name .. ".sass")
             end
             -- why 2 * a ? I don't know
             index = index + 2 * a
