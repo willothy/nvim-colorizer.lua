@@ -28,7 +28,6 @@ do
   -- do not run the loop multiple times
   local b = string.byte
   local byte_values = { ["0"] = b "0", ["9"] = b "9", ["a"] = b "a", ["f"] = b "f", ["z"] = b "z" }
-  local extra_char = { [b "-"] = true }
 
   for i = 0, 255 do
     local v = 0
@@ -45,8 +44,6 @@ do
         v = bor(v, lshift(1, 2))
         v = bor(v, lshift(lowercase - byte_values["a"] + 10, 4))
       end
-    elseif extra_char[i] then
-      v = i
     end
     BYTE_CATEGORY[i] = v
   end
@@ -65,6 +62,13 @@ end
 ---@return boolean
 function utils.byte_is_hex(byte)
   return band(BYTE_CATEGORY[byte], CATEGORY_HEX) ~= 0
+end
+
+---Obvious.
+---@param byte number
+---@return boolean
+function utils.byte_is_valid_colorchar(byte)
+  return utils.byte_is_alphanumeric(byte) or byte == ("-"):byte()
 end
 
 --- Get last modified time of a file

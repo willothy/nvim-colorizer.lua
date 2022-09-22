@@ -11,6 +11,7 @@ local Trie = require "colorizer.trie"
 local utils = require "colorizer.utils"
 local byte_is_alphanumeric = utils.byte_is_alphanumeric
 local byte_is_hex = utils.byte_is_hex
+local byte_is_valid_colorchar = utils.byte_is_valid_colorchar
 local parse_hex = utils.parse_hex
 local percent_or_hex = utils.percent_or_hex
 
@@ -256,7 +257,7 @@ function color.name_parser(line, i, opts)
     return
   end
 
-  if i > 1 and byte_is_alphanumeric(line:byte(i - 1)) then
+  if i > 1 and byte_is_valid_colorchar(line:byte(i - 1)) then
     return
   end
 
@@ -266,7 +267,7 @@ function color.name_parser(line, i, opts)
     -- Take the Blue out of Blueberry
     -- Line end or non-letter.
     local next_byte_index = i + #prefix
-    if #line >= next_byte_index and byte_is_alphanumeric(line:byte(next_byte_index)) then
+    if #line >= next_byte_index and byte_is_valid_colorchar(line:byte(next_byte_index)) then
       return
     end
     return #prefix, COLOR_MAP[prefix]
