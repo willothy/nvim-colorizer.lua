@@ -1,5 +1,5 @@
 ---Helper utils
---@module utils
+--@module colorizer.utils
 local bit, ffi = require "bit", require "ffi"
 local band, bor, rshift, lshift = bit.band, bit.bor, bit.rshift, bit.lshift
 
@@ -64,7 +64,7 @@ function utils.byte_is_hex(byte)
   return band(BYTE_CATEGORY[byte], CATEGORY_HEX) ~= 0
 end
 
----Obvious.
+---Valid colorchars are alphanumeric and - ( tailwind colors )
 ---@param byte number
 ---@return boolean
 function utils.byte_is_valid_colorchar(byte)

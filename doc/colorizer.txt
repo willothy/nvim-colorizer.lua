@@ -706,4 +706,126 @@ Trie implementation in luajit.
 todo: write documentation
 
 
+==============================================================================
+UTILS                                             *colorizer.utils-introduction*
+
+Helper utils
+
+
+==============================================================================
+LUA API                                                *colorizer.utils-lua-api*
+
+Functions: ~
+    |byte_is_alphanumeric| - Obvious.
+
+    |byte_is_hex| - Obvious.
+
+    |byte_is_valid_colorchar| - Valid colorchars are alphanumeric and - (
+    tailwind colors )
+
+    |get_last_modified| - Get last modified time of a file
+
+    |merge| - Merge two tables.
+
+    |parse_hex| - Obvious.
+
+    |percent_or_hex| - Obvious.
+
+    |watch_file| - Watch a file for changes and execute callback
+
+
+byte_is_alphanumeric({byte})              *colorizer.utils.byte_is_alphanumeric*
+    Obvious.
+
+    Parameters: ~
+	{byte} -  number
+
+    returns:~
+	boolean
+
+
+
+byte_is_hex({byte})                                *colorizer.utils.byte_is_hex*
+    Obvious.
+
+    Parameters: ~
+	{byte} -  number
+
+    returns:~
+	boolean
+
+
+
+byte_is_valid_colorchar({byte})        *colorizer.utils.byte_is_valid_colorchar*
+    Valid colorchars are alphanumeric and - ( tailwind colors )
+
+    Parameters: ~
+	{byte} -  number
+
+    returns:~
+	boolean
+
+
+
+get_last_modified({path})                    *colorizer.utils.get_last_modified*
+    Get last modified time of a file
+
+    Parameters: ~
+	{path} -  string: file path
+
+    returns:~
+	number or nil: modified time
+
+
+
+merge({...})                                             *colorizer.utils.merge*
+    Merge two tables.
+
+
+     todo: Remove this and use `vim.tbl_deep_extend`
+
+
+    Parameters: ~
+	{...} -
+
+    returns:~
+	table
+
+
+
+parse_hex({byte})                                    *colorizer.utils.parse_hex*
+    Obvious.
+
+    Parameters: ~
+	{byte} -  number
+
+    returns:~
+	number
+
+
+
+percent_or_hex({v})                             *colorizer.utils.percent_or_hex*
+    Obvious.
+
+    Parameters: ~
+	{v} -  string
+
+    returns:~
+	number or nil
+
+
+
+watch_file({path}, {callback}, {...})               *colorizer.utils.watch_file*
+    Watch a file for changes and execute callback
+
+    Parameters: ~
+	{path} -  string: File path
+	{callback} -  function: Callback to execute
+	{...} -  array: params for callback
+
+    returns:~
+	function or nil
+
+
+
 vim:tw=80:ts=8:noet:ft=help:norl:
