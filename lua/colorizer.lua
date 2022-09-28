@@ -371,6 +371,7 @@ function colorizer.setup(config)
     all = { file = false, buf = false },
     default_options = merge(USER_DEFAULT_OPTIONS, user_default_options),
   }
+  BUFFER_OPTIONS, BUFFER_LOCAL = {}, {}
 
   local function COLORIZER_SETUP_HOOK(typ)
     local filetype = vim.bo.filetype
@@ -412,8 +413,7 @@ function colorizer.setup(config)
     end
   end
 
-  local au_group_id = augroup(AUGROUP_NAME, {})
-  AUGROUP_ID = au_group_id
+  AUGROUP_ID = augroup(AUGROUP_NAME, {})
 
   local aucmd = { buf = "BufWinEnter", file = "FileType" }
   local function parse_opts(typ, tbl)
@@ -446,12 +446,13 @@ function colorizer.setup(config)
         end
       end
       autocmd({ aucmd[typ] }, {
-        group = au_group_id,
+        group = AUGROUP_ID,
         pattern = typ == "file" and (SETUP_SETTINGS.all[typ] and "*" or list) or nil,
         callback = function()
           COLORIZER_SETUP_HOOK(typ)
         end,
       })
+      COLORIZER_SETUP_HOOK(typ)
     elseif tbl then
       vim.notify_once(string.format("colorizer: Invalid type for %stypes %s", typ, vim.inspect(tbl)), "ErrorMsg")
     end
@@ -461,7 +462,7 @@ function colorizer.setup(config)
   parse_opts("buf", buftypes)
 
   autocmd("ColorScheme", {
-    group = au_group_id,
+    group = AUGROUP_ID,
     callback = function()
       require("colorizer").clear_highlight_cache()
     end,
