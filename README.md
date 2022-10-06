@@ -27,7 +27,7 @@ every filetype.
 **NOTE**: You should add this line after/below where your plugins are setup.
 
 ```lua
-require'colorizer'.setup()
+require 'colorizer'.setup()
 ```
 
 ### Use with commands
