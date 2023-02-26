@@ -109,7 +109,7 @@ function buffer.add_highlight(buf, ns, line_start, line_end, data, options)
     for linenr, hls in pairs(data) do
       for _, hl in ipairs(hls) do
         local hlname = create_highlight(hl.rgb_hex, mode)
-        buf_set_virtual_text(0, ns, linenr, hl.range[2], {
+        buf_set_virtual_text(buf, ns, linenr, hl.range[2], {
           end_col = hl.range[2],
           virt_text = { { options.virtualtext or "■", hlname } },
           hl_mode = "combine",
