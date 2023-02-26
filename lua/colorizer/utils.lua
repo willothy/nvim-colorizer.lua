@@ -71,6 +71,14 @@ function utils.byte_is_valid_colorchar(byte)
   return utils.byte_is_alphanumeric(byte) or byte == ("-"):byte()
 end
 
+---Count the number of character in a string
+---@param str string
+---@param pattern string
+---@return number
+function utils.count(str, pattern)
+  return select(2, string.gsub(str, pattern, ""))
+end
+
 --- Get last modified time of a file
 ---@param path string: file path
 ---@return number|nil: modified time

@@ -12,6 +12,7 @@ local utils = require "colorizer.utils"
 local byte_is_alphanumeric = utils.byte_is_alphanumeric
 local byte_is_hex = utils.byte_is_hex
 local byte_is_valid_colorchar = utils.byte_is_valid_colorchar
+local count = utils.count
 local parse_hex = utils.parse_hex
 local percent_or_hex = utils.percent_or_hex
 
@@ -100,7 +101,7 @@ function color.hsl_function_parser(line, i, opts)
   local min_commas, min_spaces = 2, 2
   local pattern = "^"
     .. opts.prefix
-    .. "%(%s*([.%d]+)([deg]*)([turn]*)(,?)(%s?)%s*(%d+)%%(,?)(%s?)%s*(%d+)%%%s*(/?,?)%s*([.%d]*)([%%]?)%s*%)()"
+    .. "%(%s*([.%d]+)([deg]*)([turn]*)(%s?)%s*(,?)%s*(%d+)%%(%s?)%s*(,?)%s*(%d+)%%%s*(/?,?)%s*([.%d]*)([%%]?)%s*%)()"
 
   if opts.prefix == "hsl" then
     min_len = CSS_HSL_FN_MINIMUM_LENGTH
@@ -110,7 +111,7 @@ function color.hsl_function_parser(line, i, opts)
     return
   end
 
-  local h, deg, turn, csep1, ssep1, s, csep2, ssep2, l, sep3, a, percent_sign, match_end = line:sub(i):match(pattern)
+  local h, deg, turn, ssep1, csep1, s, ssep2, csep2, l, sep3, a, percent_sign, match_end = line:sub(i):match(pattern)
   if not match_end then
     return
   end
@@ -129,11 +130,11 @@ function color.hsl_function_parser(line, i, opts)
   local s_seps = ("%s%s"):format(ssep1, ssep2)
   -- comma separator syntax
   if c_seps:match "," then
-    if not (#c_seps:match ",*" == min_commas) then
+    if not (count(c_seps, ",") == min_commas) then
       return
     end
     -- space separator syntax with decimal or percentage alpha
-  elseif #s_seps:match "%s*" >= min_spaces then
+  elseif count(s_seps, "%s") >= min_spaces then
     if a then
       if not (c_seps == "/") then
         return
