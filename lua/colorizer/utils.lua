@@ -122,25 +122,10 @@ function utils.parse_hex(byte)
   return rshift(BYTE_CATEGORY[byte], 4)
 end
 
-local b_percent = string.byte "%"
---- Obvious.
----@param v string
----@return number|nil
-function utils.percent_or_hex(v)
-  if v:byte(-1) == b_percent then
-    return tonumber(v:sub(1, -2)) / 100 * 255
-  end
-  local x = tonumber(v)
-  if x > 255 then
-    return
-  end
-  return x
-end
-
 --- Watch a file for changes and execute callback
 ---@param path string: File path
 ---@param callback function: Callback to execute
----@param ... array: params for callback
+---@param ... table: params for callback
 ---@return function|nil
 function utils.watch_file(path, callback, ...)
   if not path or type(callback) ~= "function" then

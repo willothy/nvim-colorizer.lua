@@ -15,7 +15,7 @@ local B_HASH, DOLLAR_HASH = ("#"):byte(), ("$"):byte()
 local parser = {
   ["_0x"] = color.argb_hex_parser,
   ["_rgb"] = color.rgb_function_parser,
-  ["_rgba"] = color.rgba_function_parser,
+  ["_rgba"] = color.rgb_function_parser,
   ["_hsl"] = color.hsl_function_parser,
   ["_hsla"] = color.hsl_function_parser,
 }
