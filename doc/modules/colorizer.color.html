@@ -86,12 +86,8 @@
 	<td class="summary">Grab all the colour values from <code>vim.api.nvim_get_color_map</code> and create a lookup table.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#rgb_function_parser">rgb_function_parser (line, i)</a></td>
-	<td class="summary">Parse for rgb() css function and return rgb hex.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#rgba_function_parser">rgba_function_parser (line, i)</a></td>
-	<td class="summary">Parse for rgba() css function and return rgb hex.</td>
+	<td class="name" nowrap><a href="#rgb_function_parser">rgb_function_parser (line, i, opts)</a></td>
+	<td class="summary">Parse for rgb() rgba() css function and return rgb hex.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#rgba_hex_parser">rgba_hex_parser (line, i, opts)</a></td>
@@ -292,10 +288,11 @@
 </dd>
     <dt>
     <a name = "rgb_function_parser"></a>
-    <strong>rgb_function_parser (line, i)</strong>
+    <strong>rgb_function_parser (line, i, opts)</strong>
     </dt>
     <dd>
-    Parse for rgb() css function and return rgb hex.
+    Parse for rgb() rgba() css function and return rgb hex.
+ For more info: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb
 
 
     <h3>Parameters:</h3>
@@ -306,45 +303,15 @@
         <li><span class="parameter">i</span>
          number: Index of line from where to start parsing
         </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-        <li>
-        number|nil: Index of line where the rgb function ended</li>
-        <li>
-        string|nil: rgb hex value</li>
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "rgba_function_parser"></a>
-    <strong>rgba_function_parser (line, i)</strong>
-    </dt>
-    <dd>
-    Parse for rgba() css function and return rgb hex.
- Todo consider removing the regexes here
- Todo this might not be the best approach to alpha channel.
- Things like pumblend might be useful here.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">line</span>
-         string: Line to parse
-        </li>
-        <li><span class="parameter">i</span>
-         number: Index of line from where to start parsing
+        <li><span class="parameter">opts</span>
+         table: Values passed from matchers like prefix
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
         <li>
-        number|nil: Index of line where the rgba function ended</li>
+        number|nil: Index of line where the rgb/rgba function ended</li>
         <li>
         string|nil: rgb hex value</li>
     </ol>

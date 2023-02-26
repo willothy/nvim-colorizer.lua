@@ -437,6 +437,8 @@ In <a href="../modules/colorizer.html#user_default_options">user_default_options
       -- parsers can contain values used in |user_default_options|
       sass = { enable = false, parsers = { css }, }, -- Enable sass colors
       virtualtext = "■",
+      -- update color values even if buffer is not focused
+      always_update = false
   }
 </pre>
 
@@ -483,6 +485,9 @@ In <a href="../modules/colorizer.html#user_default_options">user_default_options
         </li>
         <li><span class="parameter">virtualtext</span>
          string
+        </li>
+        <li><span class="parameter">always_update</span>
+         boolean
         </li>
     </ul>
 

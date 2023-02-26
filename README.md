@@ -100,6 +100,9 @@ library to do custom highlighting themselves.
         -- parsers can contain values used in |user_default_options|
         sass = { enable = false, parsers = { "css" }, }, -- Enable sass colors
         virtualtext = "■",
+        -- update color values even if buffer is not focused
+        -- example use: cmp_menu, cmp_docs
+        always_update = false
       },
       -- all the sub-options of filetypes apply to buftypes
       buftypes = {},
@@ -160,6 +163,13 @@ require 'colorizer'.setup {
   },
 }
 
+-- Alwyas update the color values in cmp_docs even if it not focused
+require 'colorizer'.setup {
+  filetypes = {
+    '*'; -- Highlight all files, but customize some others.
+    cmp_docs = {always_update = true}
+  },
+}
 ```
 
 In `user_default_options`, there are 2 types of options
@@ -186,6 +196,22 @@ e.g: Here `names`, `RGB`, `RRGGBB`, `RRGGBBAA` is enabled but not `rgb_fn` and `
 
 ```lua
 require 'colorizer'.setup { user_default_options = { css_fn = false, css = true } }
+```
+
+### Updating color even when buffer is not focused
+
+Like in floating windows, popup menu, etc
+
+use `always_update` flag. Use with caution, as this will update for any change in that buffer, whether focused or not.
+
+```lua
+-- Alwyas update the color values in cmp_docs even if it not focused
+require 'colorizer'.setup {
+  filetypes = {
+    '*'; -- Highlight all files, but customize some others.
+    cmp_docs = {always_update = true}
+  },
+}
 ```
 
 All the above examples can also be apply to buftypes. Also no buftypes trigger colorizer by default

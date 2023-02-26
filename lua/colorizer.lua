@@ -139,6 +139,8 @@ local CURRENT_BUF = 0
 --      -- parsers can contain values used in |user_default_options|
 --      sass = { enable = false, parsers = { css }, }, -- Enable sass colors
 --      virtualtext = "■",
+--      -- update color values even if buffer is not focused
+--      always_update = false
 --  }
 --</pre>
 ---@table user_default_options
@@ -155,6 +157,7 @@ local CURRENT_BUF = 0
 --@field tailwind boolean|string
 --@field sass table
 --@field virtualtext string
+--@field always_update boolean
 local USER_DEFAULT_OPTIONS = {
   RGB = true,
   RRGGBB = true,
@@ -169,6 +172,7 @@ local USER_DEFAULT_OPTIONS = {
   tailwind = false,
   sass = { enable = false, parsers = { css = true } },
   virtualtext = "■",
+  always_update = false,
 }
 
 local OPTIONS = { buf = {}, file = {} }
@@ -200,8 +204,6 @@ local function parse_buffer_options(options)
     ["css"] = { "names", "RGB", "RRGGBB", "RRGGBBAA", "hsl_fn", "rgb_fn" },
     ["css_fn"] = { "hsl_fn", "rgb_fn" },
   }
-  local css_includes = { "names", "RGB", "RRGGBB", "RRGGBBAA", "hsl_fn", "rgb_fn" }
-  local css_fn_includes = { "hsl_fn", "rgb_fn" }
   local default_opts = USER_DEFAULT_OPTIONS
 
   local function handle_alias(name, opts, d_opts)
@@ -364,28 +366,30 @@ function colorizer.attach_to_buffer(buf, options, typ)
     CURRENT_BUF = buf
   end
 
-  -- attach using lua api so buffer gets updated even when not the current buffer
-  -- completely moving to buf_attach is not possible because it doesn't handle all the text change events
-  vim.api.nvim_buf_attach(buf, false, {
-    on_lines = function(_, buffer)
-      -- only reload if the buffer is not the current one
-      if not (CURRENT_BUF == buffer) then
-        -- only reload if it was not disabled using detach_from_buffer
-        if BUFFER_OPTIONS[buf] then
-          rehighlight_buffer(buf, options, BUFFER_LOCAL[buf])
+  if options.always_update then
+    -- attach using lua api so buffer gets updated even when not the current buffer
+    -- completely moving to buf_attach is not possible because it doesn't handle all the text change events
+    vim.api.nvim_buf_attach(buf, false, {
+      on_lines = function(_, buffer)
+        -- only reload if the buffer is not the current one
+        if not (CURRENT_BUF == buffer) then
+          -- only reload if it was not disabled using detach_from_buffer
+          if BUFFER_OPTIONS[buf] then
+            rehighlight_buffer(buf, options, BUFFER_LOCAL[buf])
+          end
         end
-      end
-    end,
-    on_reload = function(_, buffer)
-      -- only reload if the buffer is not the current one
-      if not (CURRENT_BUF == buffer) then
-        -- only reload if it was not disabled using detach_from_buffer
-        if BUFFER_OPTIONS[buf] then
-          rehighlight_buffer(buf, options, BUFFER_LOCAL[buf])
+      end,
+      on_reload = function(_, buffer)
+        -- only reload if the buffer is not the current one
+        if not (CURRENT_BUF == buffer) then
+          -- only reload if it was not disabled using detach_from_buffer
+          if BUFFER_OPTIONS[buf] then
+            rehighlight_buffer(buf, options, BUFFER_LOCAL[buf])
+          end
         end
-      end
-    end,
-  })
+      end,
+    })
+  end
 
   autocmds[#autocmds + 1] = autocmd(text_changed_au, {
     group = au_group_id,

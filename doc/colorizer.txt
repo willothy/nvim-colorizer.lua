@@ -245,6 +245,8 @@ user_default_options                            *colorizer.user_default_options*
 	  -- parsers can contain values used in |user_default_options|
 	  sass = { enable = false, parsers = { css }, }, -- Enable sass colors
 	  virtualtext = "■",
+	  -- update color values even if buffer is not focused
+	  always_update = false
       }
 <
 
@@ -263,6 +265,7 @@ user_default_options                            *colorizer.user_default_options*
 	{tailwind} -  boolean|string
 	{sass} -  table
 	{virtualtext} -  string
+	{always_update} -  boolean
 
 
 
@@ -430,9 +433,8 @@ Functions: ~
     |name_parser| - Grab all the colour values from `vim.api.nvim_get_color_map`
     and create a lookup table.
 
-    |rgb_function_parser| - Parse for rgb() css function and return rgb hex.
-
-    |rgba_function_parser| - Parse for rgba() css function and return rgb hex.
+    |rgb_function_parser| - Parse for rgb() rgba() css function and return rgb
+    hex.
 
     |rgba_hex_parser| - parse for #rrggbbaa and return rgb hex.
 
@@ -529,33 +531,20 @@ name_parser({line}, {i}, {opts})                   *colorizer.color.name_parser*
 
 
 
-rgb_function_parser({line}, {i})           *colorizer.color.rgb_function_parser*
-    Parse for rgb() css function and return rgb hex.
+rgb_function_parser({line}, {i}, {opts})   *colorizer.color.rgb_function_parser*
+    Parse for rgb() rgba() css function and return rgb hex.
 
-    Parameters: ~
-	{line} -  string: Line to parse
-	{i} -  number: Index of line from where to start parsing
-
-    returns:~
-	number or nil: Index of line where the rgb function ended
-	string or nil: rgb hex value
-
-
-
-rgba_function_parser({line}, {i})         *colorizer.color.rgba_function_parser*
-    Parse for rgba() css function and return rgb hex.
-
-     Todo consider removing the regexes here
-     Todo this might not be the best approach to alpha channel.
-     Things like pumblend might be useful here.
+     For more info:
+     https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb
 
 
     Parameters: ~
 	{line} -  string: Line to parse
 	{i} -  number: Index of line from where to start parsing
+	{opts} -  table: Values passed from matchers like prefix
 
     returns:~
-	number or nil: Index of line where the rgba function ended
+	number or nil: Index of line where the rgb/rgba function ended
 	string or nil: rgb hex value
 
 
@@ -747,13 +736,13 @@ Functions: ~
     |byte_is_valid_colorchar| - Valid colorchars are alphanumeric and - (
     tailwind colors )
 
+    |count| - Count the number of character in a string
+
     |get_last_modified| - Get last modified time of a file
 
     |merge| - Merge two tables.
 
     |parse_hex| - Obvious.
-
-    |percent_or_hex| - Obvious.
 
     |watch_file| - Watch a file for changes and execute callback
 
@@ -788,6 +777,18 @@ byte_is_valid_colorchar({byte})        *colorizer.utils.byte_is_valid_colorchar*
 
     returns:~
 	boolean
+
+
+
+count({str}, {pattern})                                  *colorizer.utils.count*
+    Count the number of character in a string
+
+    Parameters: ~
+	{str} -  string
+	{pattern} -  string
+
+    returns:~
+	number
 
 
 
@@ -828,24 +829,13 @@ parse_hex({byte})                                    *colorizer.utils.parse_hex*
 
 
 
-percent_or_hex({v})                             *colorizer.utils.percent_or_hex*
-    Obvious.
-
-    Parameters: ~
-	{v} -  string
-
-    returns:~
-	number or nil
-
-
-
 watch_file({path}, {callback}, {...})               *colorizer.utils.watch_file*
     Watch a file for changes and execute callback
 
     Parameters: ~
 	{path} -  string: File path
 	{callback} -  function: Callback to execute
-	{...} -  array: params for callback
+	{...} -  table: params for callback
 
     returns:~
 	function or nil
