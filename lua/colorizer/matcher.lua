@@ -3,21 +3,24 @@
 local Trie = require "colorizer.trie"
 local min, max = math.min, math.max
 
-local color = require "colorizer.color"
-local color_name_parser = color.name_parser
-local rgba_hex_parser = color.rgba_hex_parser
+local color_name_parser = require "colorizer.parser.names"
 
-local sass = require "colorizer.sass"
-local sass_name_parser = sass.name_parser
+local rgb_function_parser = require "colorizer.parser.rgb"
+local hsl_function_parser = require "colorizer.parser.hsl"
+
+local argb_hex_parser = require "colorizer.parser.argb_hex"
+local rgba_hex_parser = require "colorizer.parser.rgba_hex"
+
+local sass_name_parser = require("colorizer.sass").name_parser
 
 local B_HASH, DOLLAR_HASH = ("#"):byte(), ("$"):byte()
 
 local parser = {
-  ["_0x"] = color.argb_hex_parser,
-  ["_rgb"] = color.rgb_function_parser,
-  ["_rgba"] = color.rgb_function_parser,
-  ["_hsl"] = color.hsl_function_parser,
-  ["_hsla"] = color.hsl_function_parser,
+  ["_0x"] = argb_hex_parser,
+  ["_rgb"] = rgb_function_parser,
+  ["_rgba"] = rgb_function_parser,
+  ["_hsl"] = hsl_function_parser,
+  ["_hsla"] = hsl_function_parser,
 }
 
 local matcher = {}

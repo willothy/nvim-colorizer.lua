@@ -40,9 +40,9 @@
 <ul class="nowrap">
   <li><a href="../modules/colorizer.html">colorizer</a></li>
   <li><a href="../modules/colorizer.buffer.html">buffer</a></li>
-  <li><strong>color</strong></li>
+  <li><a href="../modules/colorizer.color.html">color</a></li>
   <li><a href="../modules/colorizer.matcher.html">matcher</a></li>
-  <li><a href="../modules/colorizer.parser.argb_hex.html">parser.argb_hex</a></li>
+  <li><strong>parser.argb_hex</strong></li>
   <li><a href="../modules/colorizer.parser.hsl.html">parser.hsl</a></li>
   <li><a href="../modules/colorizer.parser.names.html">parser.names</a></li>
   <li><a href="../modules/colorizer.parser.rgb.html">parser.rgb</a></li>
@@ -57,8 +57,8 @@
 
 <div id="content">
 
-<h1>Module <code>colorizer.color</code></h1>
-<p>Helper color functions</p>
+<h1>Module <code>colorizer.parser.argb_hex</code></h1>
+<p>Helper function to parse argb</p>
 <p>
 
 </p>
@@ -67,16 +67,8 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#hsl_to_rgb">hsl_to_rgb (h, s, l)</a></td>
-	<td class="summary">Converts an HSL color value to RGB.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#hue_to_rgb">hue_to_rgb (p, q, t)</a></td>
-	<td class="summary">Convert hsl colour values to rgb.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#is_bright">is_bright (r, g, b)</a></td>
-	<td class="summary">Determine whether to use black or white text.</td>
+	<td class="name" nowrap><a href="#parser.argb_hex_parser">parser.argb_hex_parser (line, i)</a></td>
+	<td class="summary">parse for 0xaarrggbb and return rgb hex.</td>
 	</tr>
 </table>
 
@@ -88,92 +80,31 @@
 
     <dl class="function">
     <dt>
-    <a name = "hsl_to_rgb"></a>
-    <strong>hsl_to_rgb (h, s, l)</strong>
+    <a name = "parser.argb_hex_parser"></a>
+    <strong>parser.argb_hex_parser (line, i)</strong>
     </dt>
     <dd>
-    Converts an HSL color value to RGB.
+    parse for 0xaarrggbb and return rgb hex.
+ a format used in android apps
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">h</span>
-         number: Hue
+        <li><span class="parameter">line</span>
+         string: line to parse
         </li>
-        <li><span class="parameter">s</span>
-         number: Saturation
-        </li>
-        <li><span class="parameter">l</span>
-         number: Lightness
+        <li><span class="parameter">i</span>
+         number: index of line from where to start parsing
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
-
-        number|nil,number|nil,number|nil
+        <li>
+        number|nil: index of line where the hex value ended</li>
+        <li>
+        string|nil: rgb hex value</li>
     </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "hue_to_rgb"></a>
-    <strong>hue_to_rgb (p, q, t)</strong>
-    </dt>
-    <dd>
-    Convert hsl colour values to rgb.
- Source: https://gist.github.com/mjackson/5311256
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">p</span>
-         number
-        </li>
-        <li><span class="parameter">q</span>
-         number
-        </li>
-        <li><span class="parameter">t</span>
-         number
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        number
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "is_bright"></a>
-    <strong>is_bright (r, g, b)</strong>
-    </dt>
-    <dd>
-    Determine whether to use black or white text. </p>
-
-<p> ref: https://stackoverflow.com/a/1855903/837964
- https://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">r</span>
-         number: Red
-        </li>
-        <li><span class="parameter">g</span>
-         number: Green
-        </li>
-        <li><span class="parameter">b</span>
-         number: Blue
-        </li>
-    </ul>
-
 
 
 

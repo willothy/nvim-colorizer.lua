@@ -412,47 +412,18 @@ default_namespace                           *colorizer.buffer.default_namespace*
 ==============================================================================
 COLOR                                             *colorizer.color-introduction*
 
-Helper functions to parse different colour formats
+Helper color functions
 
 
 ==============================================================================
 LUA API                                                *colorizer.color-lua-api*
 
 Functions: ~
-    |argb_hex_parser| - parse for 0xaarrggbb and return rgb hex.
-
     |hsl_to_rgb| - Converts an HSL color value to RGB.
-
-    |hsl_function_parser| - Parse for hsl() hsla() css function and return rgb
-    hex.
 
     |hue_to_rgb| - Convert hsl colour values to rgb.
 
     |is_bright| - Determine whether to use black or white text.
-
-    |name_parser| - Grab all the colour values from `vim.api.nvim_get_color_map`
-    and create a lookup table.
-
-    |rgb_function_parser| - Parse for rgb() rgba() css function and return rgb
-    hex.
-
-    |rgba_hex_parser| - parse for #rrggbbaa and return rgb hex.
-
-
-argb_hex_parser({line}, {i})                   *colorizer.color.argb_hex_parser*
-    parse for 0xaarrggbb and return rgb hex.
-
-     a format used in android apps
-
-
-    Parameters: ~
-	{line} -  string: line to parse
-	{i} -  number: index of line from where to start parsing
-
-    returns:~
-	number or nil: index of line where the hex value ended
-	string or nil: rgb hex value
-
 
 
 hsl_to_rgb({h}, {s}, {l})                           *colorizer.color.hsl_to_rgb*
@@ -465,24 +436,6 @@ hsl_to_rgb({h}, {s}, {l})                           *colorizer.color.hsl_to_rgb*
 
     returns:~
 	number or nil,number or nil,number or nil
-
-
-
-hsl_function_parser({line}, {i}, {opts})   *colorizer.color.hsl_function_parser*
-    Parse for hsl() hsla() css function and return rgb hex.
-
-     For more info:
-     https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hsl
-
-
-    Parameters: ~
-	{line} -  string: Line to parse
-	{i} -  number: Index of line from where to start parsing
-	{opts} -  table: Values passed from matchers like prefix
-
-    returns:~
-	number or nil: Index of line where the hsla/hsl function ended
-	string or nil: rgb hex value
 
 
 
@@ -514,55 +467,6 @@ is_bright({r}, {g}, {b})                             *colorizer.color.is_bright*
 	{r} -  number: Red
 	{g} -  number: Green
 	{b} -  number: Blue
-
-
-
-name_parser({line}, {i}, {opts})                   *colorizer.color.name_parser*
-    Grab all the colour values from `vim.api.nvim_get_color_map` and create a
-    lookup table.
-
-     COLOR_MAP is used to store the colour values
-
-
-    Parameters: ~
-	{line} -  string: Line to parse
-	{i} -  number: Index of line from where to start parsing
-	{opts} -  table: Currently contains whether tailwind is enabled or not
-
-
-
-rgb_function_parser({line}, {i}, {opts})   *colorizer.color.rgb_function_parser*
-    Parse for rgb() rgba() css function and return rgb hex.
-
-     For more info:
-     https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb
-
-
-    Parameters: ~
-	{line} -  string: Line to parse
-	{i} -  number: Index of line from where to start parsing
-	{opts} -  table: Values passed from matchers like prefix
-
-    returns:~
-	number or nil: Index of line where the rgb/rgba function ended
-	string or nil: rgb hex value
-
-
-
-rgba_hex_parser({line}, {i}, {opts})           *colorizer.color.rgba_hex_parser*
-    parse for #rrggbbaa and return rgb hex.
-
-     a format used in android apps
-
-
-    Parameters: ~
-	{line} -  string: line to parse
-	{i} -  number: index of line from where to start parsing
-	{opts} -  table: Containing minlen, maxlen, valid_lengths
-
-    returns:~
-	number or nil: index of line where the hex value ended
-	string or nil: rgb hex value
 
 
 
@@ -607,6 +511,167 @@ make({options})                                         *colorizer.matcher.make*
     returns:~
 	function or boolean: function which will just parse the line for enabled
 	parsers
+
+
+
+==============================================================================
+ARGB_HEX                                *colorizer.parser.argb_hex-introduction*
+
+Helper function to parse argb
+
+
+==============================================================================
+LUA API                                      *colorizer.parser.argb_hex-lua-api*
+
+Functions: ~
+    |parser.argb_hex_parser| - parse for 0xaarrggbb and return rgb hex.
+
+
+
+			      *colorizer.parser.argb_hex.parser.argb_hex_parser*
+parser.argb_hex_parser({line}, {i})
+    parse for 0xaarrggbb and return rgb hex.
+
+     a format used in android apps
+
+
+    Parameters: ~
+	{line} -  string: line to parse
+	{i} -  number: index of line from where to start parsing
+
+    returns:~
+	number or nil: index of line where the hex value ended
+	string or nil: rgb hex value
+
+
+
+==============================================================================
+HSL                                          *colorizer.parser.hsl-introduction*
+
+Helper function to parse argb
+
+
+==============================================================================
+LUA API                                           *colorizer.parser.hsl-lua-api*
+
+Functions: ~
+    |parser.hsl_function_parser| - Parse for hsl() hsla() css function and
+    return rgb hex.
+
+
+
+			       *colorizer.parser.hsl.parser.hsl_function_parser*
+parser.hsl_function_parser({line}, {i}, {opts})
+    Parse for hsl() hsla() css function and return rgb hex.
+
+     For more info:
+     https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hsl
+
+
+    Parameters: ~
+	{line} -  string: Line to parse
+	{i} -  number: Index of line from where to start parsing
+	{opts} -  table: Values passed from matchers like prefix
+
+    returns:~
+	number or nil: Index of line where the hsla/hsl function ended
+	string or nil: rgb hex value
+
+
+
+==============================================================================
+NAMES                                      *colorizer.parser.names-introduction*
+
+Helper function to parse argb
+
+
+==============================================================================
+LUA API                                         *colorizer.parser.names-lua-api*
+
+Functions: ~
+    |parser.name_parser| - Grab all the colour values from
+    `vim.api.nvim_get_color_map` and create a lookup table.
+
+
+
+				     *colorizer.parser.names.parser.name_parser*
+parser.name_parser({line}, {i}, {opts})
+    Grab all the colour values from `vim.api.nvim_get_color_map` and create a
+    lookup table.
+
+     COLOR_MAP is used to store the colour values
+
+
+    Parameters: ~
+	{line} -  string: Line to parse
+	{i} -  number: Index of line from where to start parsing
+	{opts} -  table: Currently contains whether tailwind is enabled or not
+
+
+
+==============================================================================
+RGBA_HEX                                *colorizer.parser.rgba_hex-introduction*
+
+Helper function to parse argb
+
+
+==============================================================================
+LUA API                                      *colorizer.parser.rgba_hex-lua-api*
+
+Functions: ~
+    |parser.rgba_hex_parser| - parse for #rrggbbaa and return rgb hex.
+
+
+
+			      *colorizer.parser.rgba_hex.parser.rgba_hex_parser*
+parser.rgba_hex_parser({line}, {i}, {opts})
+    parse for #rrggbbaa and return rgb hex.
+
+     a format used in android apps
+
+
+    Parameters: ~
+	{line} -  string: line to parse
+	{i} -  number: index of line from where to start parsing
+	{opts} -  table: Containing minlen, maxlen, valid_lengths
+
+    returns:~
+	number or nil: index of line where the hex value ended
+	string or nil: rgb hex value
+
+
+
+==============================================================================
+RGB                                          *colorizer.parser.rgb-introduction*
+
+Helper function to parse argb
+
+
+==============================================================================
+LUA API                                           *colorizer.parser.rgb-lua-api*
+
+Functions: ~
+    |parser.rgb_function_parser| - Parse for rgb() rgba() css function and
+    return rgb hex.
+
+
+
+			       *colorizer.parser.rgb.parser.rgb_function_parser*
+parser.rgb_function_parser({line}, {i}, {opts})
+    Parse for rgb() rgba() css function and return rgb hex.
+
+     For more info:
+     https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb
+
+
+    Parameters: ~
+	{line} -  string: Line to parse
+	{i} -  number: Index of line from where to start parsing
+	{opts} -  table: Values passed from matchers like prefix
+
+    returns:~
+	number or nil: Index of line where the rgb/rgba function ended
+	string or nil: rgb hex value
 
 
 
