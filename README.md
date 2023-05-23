@@ -92,7 +92,7 @@ library to do custom highlighting themselves.
         hsl_fn = false, -- CSS hsl() and hsla() functions
         css = false, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
         css_fn = false, -- Enable all CSS *functions*: rgb_fn, hsl_fn
-        -- Available modes for `mode`: foreground, background,  virtualtext
+        -- Available modes for `mode`: foreground, background,  virtualtext, inline
         mode = "background", -- Set the display mode.
         -- Available methods are false / true / "normal" / "lsp" / "both"
         -- True is same as normal
@@ -114,6 +114,7 @@ MODES:
 - `foreground`: sets the foreground text color.
 - `background`: sets the background text color.
 - `virtualtext`: indicate the color behind the virtualtext.
+- `inline`: indicate the color with inline virtualtext (Neovim v0.10+).
 
 For basic setup, you can use a command like the following.
 
