@@ -114,12 +114,14 @@ function buffer.add_highlight(buf, ns, line_start, line_end, data, options)
           virt_text = { { options.virtualtext or "■", hlname } },
           hl_mode = "combine",
         }
+        local col = hl.range[2]
         if options.mode == "virtualtext" then
           opts.end_col = hl.range[2]
         elseif options.mode == "inline" then
           opts.virt_text_pos = "inline"
+          col = hl.range[1]
         end
-        buf_set_virtual_text(buf, ns, linenr, hl.range[2], opts)
+        buf_set_virtual_text(buf, ns, linenr, col, opts)
       end
     end
   end
